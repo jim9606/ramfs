@@ -1,4 +1,5 @@
 #include "fsimpl.h"
+#include <time.h>
 
 block_no_t fsimpl::getFreeBlock() const {
 	return dev.superblock.block_bitset.size() - dev.superblock.block_bitset.count();

@@ -1,5 +1,9 @@
 #include "utils.h"
 #include <string.h>
+#include <random>
+
+using std::default_random_engine;
+using std::uniform_int_distribution;
 
 void logerr(const char* tag, const char* msg) {
 	fprintf(stderr, "%s : %s\n", tag, msg);
@@ -24,4 +28,11 @@ void printmem(const char* p, size_t len) {
 	}
 	if (len % 8 != 7)
 		fprintf(stderr, "\n");
+}
+
+void fillbuffer(char buffer[], size_t len) {
+	static default_random_engine engine;
+	static uniform_int_distribution<char> dist('A', 'Z');
+	for (size_t i = 0; i < len; ++i)
+		buffer[i] = dist(engine);
 }

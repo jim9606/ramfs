@@ -2,6 +2,7 @@
 #include <string>
 #include "fs_struct.h"
 #include "utils.h"
+#include <streambuf>
 using namespace std;
 
 void PrintStructSize() {
@@ -16,6 +17,8 @@ void PrintStructSize() {
 }
 
 int main(int argc, char **argv) {
-	PrintStructSize();
+	//PrintStructSize();
+	//TODO:CLI Parsing
+
 	return 0;
 }
