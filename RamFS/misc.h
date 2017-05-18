@@ -1,8 +1,8 @@
 #pragma once
 //This file contains transient objects
-#include"block_fs.h"
-#include<vector>
-#include<string>
+#include "fs_struct.h"
+#include <vector>
+#include <string>
 using std::vector;
 using std::string;
 
@@ -29,14 +29,17 @@ protected:
 	vector<data_block_t*> data_addr;
 	vector<sub_inode_rec_t> sub_inode_rec;
 public:
+	file_t(char *base, inode_t *inode);
 	bool init(char *base, inode_t *inode);
 	size_t size() const;
 	bool isDir() const;
 	bool isFile() const;
 
-	//valid if isFile() is true
+	//valid for file
 	size_t read(char* buffer, const addr_t offset, const addr_t length) const;
 	size_t write(char* buffer, const addr_t offset, const addr_t length);
 
+	//valid for directory
+	const vector<sub_inode_rec_t> & getSubNode();
 
 };

@@ -1,11 +1,10 @@
-#include<iostream>
-#include<string>
-#include<cstdlib>
-#include"block_fs.h"
+#include <iostream>
+#include <string>
+#include "fs_struct.h"
+#include "utils.h"
 using namespace std;
 
-
-int main(int argc, char **argv) {
+void PrintStructSize() {
 	cout << sizeof(inode_t) << endl;
 	cout << sizeof(sub_inode_rec_t) << endl;
 	cout << sizeof(dir_block_t) << endl;
@@ -14,5 +13,9 @@ int main(int argc, char **argv) {
 	cout << sizeof(inode_tuple_t) << endl;
 	cout << sizeof(superblock_t) << endl;
 	cout << sizeof(block_dev) << endl;
+}
+
+int main(int argc, char **argv) {
+	PrintStructSize();
 	return 0;
 }

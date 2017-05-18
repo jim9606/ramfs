@@ -139,13 +139,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="block_fs.cpp" />
+    <ClCompile Include="fsimpl.cpp" />
+    <ClCompile Include="fs_struct.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="misc.cpp" />
     <ClCompile Include="utils.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="block_fs.h" />
+    <ClInclude Include="fsimpl.h" />
+    <ClInclude Include="fs_struct.h" />
     <ClInclude Include="config.h" />
     <ClInclude Include="misc.h" />
     <ClInclude Include="utils.h" />

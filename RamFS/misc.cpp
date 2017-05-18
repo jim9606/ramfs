@@ -1,6 +1,6 @@
-#include"misc.h"
-#include"utils.h"
-#include<algorithm>
+#include "misc.h"
+#include "utils.h"
+#include <algorithm>
 
 using std::min;
 
@@ -27,6 +27,9 @@ void path_t::pop() {
 	n.pop_back();
 }
 
+file_t::file_t(char *base, inode_t *inode) {
+	init(base, inode);
+}
 
 bool file_t::init(char *base, inode_t *inode) {
 	this->base = base;
@@ -36,14 +39,17 @@ bool file_t::init(char *base, inode_t *inode) {
 	data_addr.push_back((data_block_t*)base + inode->d_ref);
 	if (size() <= BLOCK_SIZE)
 		return true;
-	indirect_block_t *i_block = (indirect_block_t*)(base + inode->i_ref * BLOCK_SIZE);
-	for (size_t i = 0; i < i_block->rec_count; ++i) {
+	indirect_block_t *i_block = (indirect_block_t*)base + inode->i_ref;
+	for (size_t i = 1; i < inode->rec_count; ++i) {
 		data_addr.push_back((data_block_t*)base + i_block->block_no[i]);
 	}
 
 	if (isDir()) {
-		for (auto it : data_addr) {
-			//TODO:
+		auto it = data_addr.cbegin();
+		for (size_t i = 0; i < inode->rec_count; ++it) {
+			dir_block_t *db = (dir_block_t*)(*it);
+			for (size_t j = 0; j < INODE_REC_PER_DIRBLOCK && i < inode->rec_count; ++j, ++i)
+				sub_inode_rec.push_back(db->rec[j]);
 		}
 	}
 	return true;
@@ -62,6 +68,10 @@ bool file_t::isFile() const {
 }
 
 size_t file_t::read(char* buffer, const addr_t offset, const addr_t length) const {
+	if (!isFile()) {
+		logerr("file_t.read", "Try to read a directory");
+		return 0;
+	}
 	addr_t roff = offset, rlen = length, fsize = size(), r = 0;
 	if (offset > fsize) {
 		logerr("file_t.read", "Too large offset");
@@ -71,10 +81,12 @@ size_t file_t::read(char* buffer, const addr_t offset, const addr_t length) cons
 	auto it = data_addr.cbegin(),cend = data_addr.cend();
 	it += roff / BLOCK_SIZE;
 	roff %= BLOCK_SIZE;
+	//Read first target block
 	if (roff + rlen <= BLOCK_SIZE) {
 		memcpy(buffer,(char*)(*it) + roff , rlen);
 		rlen = 0;
 	}
+	//Read more block
 	for (; rlen > 0 && it != cend; ++it) {
 		size_t cr = min(length, BLOCK_SIZE);
 		memcpy(buffer + r, (char*)(*it), cr);
@@ -84,6 +96,10 @@ size_t file_t::read(char* buffer, const addr_t offset, const addr_t length) cons
 }
 
 size_t file_t::write(char* buffer, const addr_t offset, const addr_t length) {
+	if (!isFile()) {
+		logerr("file_t.write", "Try to write a directory");
+		return 0;
+	}
 	addr_t roff = offset, rlen = length, fsize = size(), r = 0;
 	if (offset > fsize) {
 		logerr("file_t.write", "Too large offset");
@@ -97,10 +113,12 @@ size_t file_t::write(char* buffer, const addr_t offset, const addr_t length) {
 	auto it = data_addr.begin(), iend = data_addr.end();
 	it += roff / BLOCK_SIZE;
 	roff %= BLOCK_SIZE;
+	//Write the first block
 	if (roff + rlen <= BLOCK_SIZE) {
 		memcpy((char*)(*it) + roff, buffer, rlen);
 		rlen = 0;
 	}
+	//Write more block
 	for (; rlen > 0 && it != iend; ++it) {
 		size_t cr = min(length, BLOCK_SIZE);
 		memcpy((char*)(*it), buffer + r, cr);
