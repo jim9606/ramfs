@@ -1,8 +1,7 @@
 #include <iostream>
 #include <string>
-#include "fs_struct.h"
+#include "fsimpl.h"
 #include "utils.h"
-#include <streambuf>
 using namespace std;
 
 void PrintStructSize() {
@@ -16,9 +15,12 @@ void PrintStructSize() {
 	cout << sizeof(block_dev) << endl;
 }
 
+fsimpl fs;
+
 int main(int argc, char **argv) {
 	//PrintStructSize();
 	//TODO:CLI Parsing
-
+	cout << fs.getFreeSpace() << endl;
+	printmem(&fs, 64);
 	return 0;
 }

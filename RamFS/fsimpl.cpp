@@ -14,6 +14,7 @@ bool fsimpl::getFileStackByPath(filestack_t &files, path_t path) const {
 		for (auto it = sublist.cbegin(); it != sublist.cend(); ++it) {
 			if (it->name == path.get(i))
 				//TODO:
+				;
 		}
 	}
 }

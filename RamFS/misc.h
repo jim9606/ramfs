@@ -31,7 +31,7 @@ protected:
 public:
 	file_t(char *base, inode_t *inode);
 	bool init(char *base, inode_t *inode);
-	size_t size() const;
+	addr_t size() const;
 	bool isDir() const;
 	bool isFile() const;
 
@@ -45,7 +45,7 @@ public:
 };
 
 //Fill a file with random string
-addr_t genfile(file_t &f);
+void genfile(file_t &f);
 
 //Fill a file with another file
-addr_t copyfile(file_t &dst, const file_t &src);
+void copyfile(file_t &dst, const file_t &src);

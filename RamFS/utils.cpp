@@ -9,7 +9,8 @@ void logerr(const char* tag, const char* msg) {
 	fprintf(stderr, "%s : %s\n", tag, msg);
 }
 
-void printmem(const char* p, size_t len) {
+void printmem(const void* po, size_t len) {
+	const char* p = (char*)po;
 	char ch[9]; ch[8] = '\0';
 	for (size_t i = 0; i < len; ++i) {
 		fprintf(stderr, "%02X ", *(p+i));
@@ -32,7 +33,8 @@ void printmem(const char* p, size_t len) {
 
 void fillbuffer(char buffer[], size_t len) {
 	static default_random_engine engine;
-	static uniform_int_distribution<char> dist('A', 'Z');
+	static constexpr char charset[] = "0123456789";
+	static uniform_int_distribution<int> dist(0,9);
 	for (size_t i = 0; i < len; ++i)
-		buffer[i] = dist(engine);
+		buffer[i] = charset[dist(engine)];
 }

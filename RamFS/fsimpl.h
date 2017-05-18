@@ -12,6 +12,8 @@ protected:
 
 	block_no_t getFreeBlock() const;
 	bool getFileStackByPath(filestack_t &files, path_t path) const;
+
+	void createRootFile();
 public:
 	fsimpl();
 
