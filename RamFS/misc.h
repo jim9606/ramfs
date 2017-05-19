@@ -31,15 +31,21 @@ protected:
 public:
 	file_t(char *base, inode_t *inode);
 	bool init(char *base, inode_t *inode);
-	size_t size() const;
+	addr_t size() const;
 	bool isDir() const;
 	bool isFile() const;
 
 	//valid for file
-	size_t read(char* buffer, const addr_t offset, const addr_t length) const;
-	size_t write(char* buffer, const addr_t offset, const addr_t length);
+	addr_t read(char* buffer, const addr_t offset, const addr_t length) const;
+	addr_t write(const char* buffer, const addr_t offset, const addr_t length);
 
 	//valid for directory
 	const vector<sub_inode_rec_t> & getSubNode();
 
 };
+
+//Fill a file with random string
+void genfile(file_t &f);
+
+//Fill a file with another file
+void copyfile(file_t &dst, const file_t &src);

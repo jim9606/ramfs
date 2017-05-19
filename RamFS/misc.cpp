@@ -55,7 +55,7 @@ bool file_t::init(char *base, inode_t *inode) {
 	return true;
 }
 
-size_t file_t::size() const {
+addr_t file_t::size() const {
 	return (size_t)inode->size;
 }
 
@@ -67,7 +67,7 @@ bool file_t::isFile() const {
 	return inode->flags & inode_t::f_file;
 }
 
-size_t file_t::read(char* buffer, const addr_t offset, const addr_t length) const {
+addr_t file_t::read(char* buffer, const addr_t offset, const addr_t length) const {
 	if (!isFile()) {
 		logerr("file_t.read", "Try to read a directory");
 		return 0;
@@ -88,14 +88,14 @@ size_t file_t::read(char* buffer, const addr_t offset, const addr_t length) cons
 	}
 	//Read more block
 	for (; rlen > 0 && it != cend; ++it) {
-		size_t cr = min(length, BLOCK_SIZE);
+		addr_t cr = min(length,(addr_t)BLOCK_SIZE);
 		memcpy(buffer + r, (char*)(*it), cr);
 		rlen -= cr; r += cr;
 	}
 	return r;
 }
 
-size_t file_t::write(char* buffer, const addr_t offset, const addr_t length) {
+addr_t file_t::write(const char* buffer, const addr_t offset, const addr_t length) {
 	if (!isFile()) {
 		logerr("file_t.write", "Try to write a directory");
 		return 0;
@@ -120,9 +120,39 @@ size_t file_t::write(char* buffer, const addr_t offset, const addr_t length) {
 	}
 	//Write more block
 	for (; rlen > 0 && it != iend; ++it) {
-		size_t cr = min(length, BLOCK_SIZE);
+		addr_t cr = min(length, (addr_t)BLOCK_SIZE);
 		memcpy((char*)(*it), buffer + r, cr);
 		rlen -= cr; r += cr;
 	}
 	return r;
+}
+
+//Fill a file with random string
+void genfile(file_t &f) {
+	char buffer[BLOCK_SIZE];
+	addr_t len = f.size(), offset = 0;
+	while (len > BLOCK_SIZE) {
+		fillbuffer(buffer, BLOCK_SIZE);
+		f.write(buffer, offset, BLOCK_SIZE);
+		offset += BLOCK_SIZE; len -= BLOCK_SIZE;
+	}
+	if (len > 0) {
+		fillbuffer(buffer, len);
+		f.write(buffer, offset, len);
+	}
+}
+
+//Fill a file with another file
+void copyfile(file_t &dst, const file_t &src) {
+	char buffer[BLOCK_SIZE];
+	addr_t len = src.size(), offset = 0;
+	while (len > BLOCK_SIZE) {
+		src.read(buffer, offset, BLOCK_SIZE);
+		dst.write(buffer, offset, BLOCK_SIZE);
+		offset += BLOCK_SIZE; len -= BLOCK_SIZE;
+	}
+	if (len > 0) {
+		src.read(buffer, offset, len);
+		dst.write(buffer, offset, len);
+	}
 }

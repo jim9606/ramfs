@@ -2,6 +2,7 @@
 #include <string>
 #include <regex>
 #include "fs_struct.h"
+#include "fsimpl.h"
 #include "utils.h"
 using namespace std;
 
@@ -16,8 +17,12 @@ void PrintStructSize() {
 	cout << sizeof(block_dev) << endl;
 }
 
+fsimpl fs;
+
 int main(int argc, char **argv) {
 	//PrintStructSize();
+	//cout << fs.getFreeSpace() << endl;
+	//printmem(&fs, 64);
 	regex filePattern("(/?[\\w-]+)+(\\.\\w+)?");
 	regex dirPattern("(/?[\\w-]+)+");
 	string order;
@@ -106,7 +111,7 @@ int main(int argc, char **argv) {
 		}
 		else if (order == "quit") {
 			//TODO
-			return;
+			return 0;
 		}
 		else
 		{
