@@ -62,3 +62,12 @@ void genfile(file_t &f);
 
 //Fill a file with another file
 void copyfile(file_t &dst, const file_t &src);
+
+//用于ls文件信息
+struct subfile_info {
+	string name;
+	bool isFile;
+	timestamp_t ctime, atime;
+	addr_t size;
+	inode_no_t inode_no;
+};

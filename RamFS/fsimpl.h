@@ -62,5 +62,5 @@ public:
 
 	addr_t getFreeSpace() const;
 
-	vector<sub_inode_rec_t> listSub();
+	vector<subfile_info> listSub();
 };

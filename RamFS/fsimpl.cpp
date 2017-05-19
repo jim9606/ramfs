@@ -303,3 +303,17 @@ bool fsimpl::updateFile(string name) {
 
 	return true;
 }
+
+inode_no_t fsimpl::createDir(string name) {
+	inode_no_t inodeNo = allocInode();
+	if (inodeNo == 0) return inodeNo;	//ERR:InodeºÄ¾¡
+	inode_t *newInode = getInode(inodeNo);
+	newInode->init();
+	newInode->flags = inode_t::f_valid | inode_t::f_dir;
+
+	return inodeNo;
+}
+
+vector<subfile_info> fsimpl::listSub() {
+
+}
