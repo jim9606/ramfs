@@ -73,7 +73,7 @@ bool file_t::init(block_dev *base, inode_t *inode, string name) {
 	for (size_t i = 1; i < inode->rec_count; ++i) {
 		data_addr.push_back((data_block_t*)base + i_block->block_no[i]);
 	}
-
+	//TODO
 	if (isDir()) {
 		auto it = data_addr.cbegin();
 		for (size_t i = 0; i < inode->rec_count; ++it) {

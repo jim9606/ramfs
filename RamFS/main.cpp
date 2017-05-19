@@ -24,6 +24,7 @@ int main(int argc, char **argv) {
 	regex dirPattern("(/?[\\w-]*)+");
 	string order;
 	string pathString;
+	cout << fs.getCurrentDir().format() + "$";
 	while (cin >> order)
 	{
 		cout << fs.getCurrentDir().format() + "$";
@@ -53,7 +54,7 @@ int main(int argc, char **argv) {
 				if (fs.setCurrentDir(file.parent())) {
 					inode_no_t fileNumber = fs.getFile(file.back());
 					if (fileNumber) {
-						fs.deleteFile(fileNumber);
+						fs.deleteFile(file.back());
 					}
 					else {
 						cout << "\"" + pathString + "\" not found." << endl;
