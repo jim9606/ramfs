@@ -4,6 +4,10 @@
 
 using std::min;
 
+path_t::path_t(const string &s) {
+	fromString(s);
+}
+
 size_t path_t::size() const {
 	return n.size();
 }
@@ -21,6 +25,15 @@ string path_t::format() const {
 
 void path_t::push(const string &s) {
 	n.push_back(s);
+}
+
+void path_t::fromString(const string &s) {
+	char* ss = strtok(s.data,"/");
+	while (ss!=NULL)
+	{
+		n.push_back(ss);
+		ss = strtok(NULL, "/");
+	}
 }
 
 void path_t::pop() {

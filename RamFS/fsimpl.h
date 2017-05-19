@@ -21,12 +21,16 @@ public:
 	fsimpl();
 
 	path_t getCurrentDir() const;
+	string getCurrentDirString() const;
 	bool setCurrentDir(path_t path);
+	bool setCurrentDir(const string &s);
 
+	file_t getFileByName(string name);
+	file_t getFileByInodeNo(inode_no_t no);
 	//File opereration on current directory
-	bool getFile(file_t &file, string name);
-	bool createFile(file_t &file, string name, addr_t size);
-	bool deleteFile(file_t &target);
+	inode_no_t getFile(string name);
+	inode_no_t createFile(string name, addr_t size);
+	bool deleteFile(inode_no_t file);
 
 	addr_t getFreeSpace() const;
 

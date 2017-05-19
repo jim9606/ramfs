@@ -20,12 +20,16 @@ void PrintStructSize() {
 fsimpl fs;
 
 int main(int argc, char **argv) {
+	//PrintStructSize();
+	//cout << fs.getFreeSpace() << endl;
+	//printmem(&fs, 64);
 	regex filePattern("(/?[\\w-]+)+(\\.\\w+)?");
 	regex dirPattern("(/?[\\w-]+)+");
 	string order;
 	string path;
 	while (cin>>order)
 	{
+		cout << fs.getCurrentDirString() + "$";
 		if (order == "createFile") {
 			cin >> path;
 			if (regex_match(path, filePattern)) {
@@ -72,7 +76,7 @@ int main(int argc, char **argv) {
 		{
 			cin >> path;
 			if (regex_match(path, dirPattern)) {
-				//TODO
+				fs.setCurrentDir(path);
 			}
 			else
 			{
@@ -89,7 +93,9 @@ int main(int argc, char **argv) {
 			if (regex_match(path, filePattern)) {
 				cin >> direction;
 				if (regex_match(direction, filePattern)) {
-					//TODO
+					path_t from(path);
+					path_t to(direction);
+					
 				}
 				else
 				{
