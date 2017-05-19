@@ -44,6 +44,8 @@ public:
 	bool isFile() const;
 	bool isValid() const;
 	string getName() const;
+	timestamp_t getAtime() const;
+	timestamp_t getCtime() const;
 
 	//valid for file
 	addr_t read(char* buffer, const addr_t offset, const addr_t length) const;

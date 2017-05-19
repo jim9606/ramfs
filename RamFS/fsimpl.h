@@ -1,5 +1,7 @@
 #pragma once
 #include "misc.h"
+using std::pair;
+using std::make_pair;
 
 typedef std::vector<inode_no_t> files_t;
 
@@ -13,13 +15,25 @@ protected:
 
 	block_no_t getFreeBlock() const;
 	inode_t* getInode(inode_no_t no);
+	indirect_block_t* getIBlock(block_no_t no);
 	bool getFileStackByPath(files_t &files, path_t path);
 
 	//return 0 if no avaliable inode
 	inode_no_t allocInode();
+	//从参数编号开始寻找可用块
+	block_no_t allocBlock(block_no_t no);
 	void createRootFile();
+
+	//修改工作目录inode以增加新子文件（目录）,需要预先检查空间是否充足
+	void addNewSubForCD(inode_no_t sub, string subName);
+
+	//删除目录树
+	bool deleteDirTree(inode_no_t no);
 public:
 	fsimpl();
+
+	//检查文件名
+	static int checkFileName(string name);
 
 	path_t getCurrentDir() const;
 	bool setCurrentDir(path_t path);
@@ -37,7 +51,7 @@ public:
 	bool updateFile(string name);
 
 	//成功返回true
-	bool deleteFile(inode_no_t no);
+	bool deleteFile(string name);
 
 	//创建子目录
 	inode_no_t createDir(string name);
