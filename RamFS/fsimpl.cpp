@@ -9,7 +9,7 @@ inode_t* fsimpl::getInode(inode_no_t no) {
 	return &(dev.inode_tuple[no / INODE_PER_TUPLE].rec[no % INODE_PER_TUPLE]);
 }
 
-bool fsimpl::getFileStackByPath(vector<inode_no_t> &files, path_t path){
+bool fsimpl::getFileStackByPath(files_t &files, path_t path){
 	file_t tempFile;
 	files.clear();
 	files.push_back(0);
@@ -33,7 +33,8 @@ bool fsimpl::getFileStackByPath(vector<inode_no_t> &files, path_t path){
 inode_no_t fsimpl::allocInode() {
 	inode_no_t inum = 1;
 	while (inum < INODE_COUNT && dev.superblock.inode_bitset[inum]) ++inum;
-	return 0;
+	dev.superblock.inode_bitset.set(inum);
+	return inum;
 }
 
 void fsimpl::createRootFile() {
@@ -49,6 +50,7 @@ void fsimpl::createRootFile() {
 
 fsimpl::fsimpl() {
 	//Create rootFile
+	createRootFile();
 }
 
 path_t fsimpl::getCurrentDir() const {

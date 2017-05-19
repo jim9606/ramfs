@@ -5,7 +5,9 @@
 using namespace std;
 
 int main() {
-	time_t tt = time(0);
-	cout << tt << endl << ctime(&tt) << endl;
+	int t = 5;
+	int &p = t;
+	p = 6;
+	cout << t;
 	return 0;
 }
