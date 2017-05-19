@@ -34,11 +34,12 @@ int main(int argc, char **argv) {
 				cin >> fileSize;
 				path_t file(pathString);
 				if (fs.setCurrentDir(file.parent())) {
-					auto r = fs.createFile(file.back(), fileSize);
-					if (r == 0) 
-						cout << "Failed to create the file." << endl;
+					inode_no_t no = 0;
+					auto err = fs.createFile(no, file.back(), fileSize);
+					if (err == 0) 
+						cout << fsimpl::getErrMsg(err) << endl;
 					else {
-						genfile(fs.getAnonFile(r));
+						genfile(fs.getAnonFile(no));
 					}
 				}
 				else

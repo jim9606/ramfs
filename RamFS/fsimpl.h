@@ -52,8 +52,8 @@ public:
 	//由Inode编号获得匿名文件
 	file_t getAnonFile(inode_no_t no);
 
-	//在当前目录创建特定大小的文件，返回编号
-	inode_no_t createFile(string name, addr_t size);
+	//在当前目录创建特定大小的文件，返回编号,用getErrMsg解析
+	int createFile(inode_no_t& inode_no, string name, addr_t size);
 
 	//必须是当前目录下的文件，修改访问时间时调用
 	bool updateFile(string name);
@@ -69,4 +69,6 @@ public:
 	addr_t getFreeSpace() const;
 
 	vector<subfile_info> listSub();
+
+	static string getErrMsg(int err);
 };

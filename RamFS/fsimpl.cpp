@@ -167,8 +167,8 @@ fsimpl::fsimpl() {
 }
 
 int fsimpl::checkFileName(string name) {
-	if (name.size() > NAME_SIZE) return -1;	//ERR:文件名过长
-	if (name.find('/') != std::string::npos) return -2; //ERR:包含非法字符
+	if (name.size() > NAME_SIZE) return 8;	//ERR:文件名过长
+	if (name.find('/') != std::string::npos) return 1; //ERR:包含非法字符
 	return 0;
 }
 
@@ -219,27 +219,30 @@ file_t fsimpl::getAnonFile(inode_no_t no) {
 	return file_t(&dev, getInode(no), "");
 }
 
-inode_no_t fsimpl::createFile(string name, addr_t size) {
-	if (checkFileName(name) != 0) return 0; //ERR:文件名非法
+int fsimpl::createFile(inode_no_t& inode_no, string name, addr_t size) {
+	{
+		int err = checkFileName(name);
+		if (err != 0) return err;
+	}
 	for (auto const &it : currentDirFile.sub_inode_rec) {
 		if (it.name == name)
-			return 0;	//ERR:重名
+			return 2;	//ERR:重名
 	}
 
 	//计算需要的块数目
 	inode_no_t wantedBlockNum = size / BLOCK_SIZE;
 	if (size % BLOCK_SIZE > 0) ++wantedBlockNum;
-	//ERR:超出最大子文件限制
-	if (currentDirFile.inode->rec_count == 2 * INODE_REC_PER_DIRBLOCK) return 0;
+	//ERR:超出最大子文件数目限制
+	if (currentDirFile.inode->rec_count == 2 * INODE_REC_PER_DIRBLOCK) return 3;
 	//需要间接块
 	if (size > BLOCK_SIZE) ++wantedBlockNum;
 	//ERR:超出单文件限制
-	if (wantedBlockNum > BLOCKNO_PER_IBLOCK + 1) return 0;
+	if (wantedBlockNum > BLOCKNO_PER_IBLOCK + 1) return 4;
 
 	//判断工作目录是否需要扩充
 	if (currentDirFile.inode->rec_count % INODE_REC_PER_DIRBLOCK == 0) ++wantedBlockNum;
 	//ERR:空间不足
-	if (wantedBlockNum > getFreeBlock()) return 0;
+	if (wantedBlockNum > getFreeBlock()) return 5;
 	//减去工作目录扩充块
 	if (currentDirFile.inode->rec_count % INODE_REC_PER_DIRBLOCK == 0) --wantedBlockNum;
 	//减去间接块
@@ -247,7 +250,7 @@ inode_no_t fsimpl::createFile(string name, addr_t size) {
 
 	inode_no_t newInodeNo = allocInode();
 	//ERR:INODE耗尽
-	if (newInodeNo == 0) return 0;
+	if (newInodeNo == 0) return 6;
 	inode_t *newInode = getInode(newInodeNo);
 	newInode->init();
 	newInode->flags = inode_t::f_valid | inode_t::f_file;
@@ -276,8 +279,8 @@ inode_no_t fsimpl::createFile(string name, addr_t size) {
 			indBlock->block_no[i] = blockNo;
 		}
 	}
-
-	return newInodeNo;
+	inode_no = newInodeNo;
+	return 0;
 }
 
 bool fsimpl::deleteFile(string name) {
@@ -340,4 +343,29 @@ vector<subfile_info> fsimpl::listSub() {
 		res.push_back(info);
 	}
 	return res;
+}
+
+string fsimpl::getErrMsg(int err) {
+	switch (err) {
+	case 0:
+		return "Success";
+	case 1:
+		return "Invalid name";
+	case 2:
+		return "Duplicated name";
+	case 3:
+		return "Too many subfiles in current directory";
+	case 4:
+		return "Exceed single file size";
+	case 5:
+		return "Insufficient space";
+	case 6:
+		return "No more I-nodes";
+	case 7:
+		return "File not found";
+	case 8:
+		return "File name is too long";
+	default:
+		return "Unknown error";
+	}
 }
