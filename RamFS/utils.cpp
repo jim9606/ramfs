@@ -1,9 +1,13 @@
 #include "utils.h"
 #include <string.h>
 #include <random>
+#include <vector>
+#include <string>
 
 using std::default_random_engine;
 using std::uniform_int_distribution;
+using std::string;
+using std::vector;
 
 void logerr(const char* tag, const char* msg) {
 	fprintf(stderr, "%s : %s\n", tag, msg);
@@ -37,4 +41,22 @@ void fillbuffer(char buffer[], size_t len) {
 	static uniform_int_distribution<int> dist(0,9);
 	for (size_t i = 0; i < len; ++i)
 		buffer[i] = charset[dist(engine)];
+}
+
+vector<string> split(const string& str, const char* c)
+{
+	char *cstr, *p;
+	vector<string> res;
+	if (str.front() != '/') {
+		res.push_back("//");
+	}
+	cstr = new char[str.size() + 1];
+	strcpy(cstr, str.c_str());
+	p = strtok(cstr, c);
+	while (p != NULL)
+	{
+		res.push_back(p);
+		p = strtok(NULL, c);
+	}
+	return res;
 }

@@ -62,13 +62,18 @@ path_t fsimpl::getCurrentDir() const {
 }
 
 bool fsimpl::setCurrentDir(path_t path) {
+	//拼接相对路径
+	if (path.front() == "//") {
+		path_t rootPath = getCurrentDir();
+		path = rootPath.append(path);
+	}
+	
 	files_t npwd;
 	bool b = getFileStackByPath(npwd, path);
 	if (b) {
 		if (!(getInode(npwd.back())->flags & inode_t::f_dir)) return false;//It's a file
 		currentDirFileStack = npwd;
 		currentDirPath = path;
-
 	}
 	return b;
 }

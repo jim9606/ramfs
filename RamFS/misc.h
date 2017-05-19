@@ -16,7 +16,10 @@ public:
 	string get(const size_t c) const;
 	string format() const;
 	void push(const string &s);
-	void pop();
+	path_t append(const path_t &relativePath);
+	path_t parent();
+	string front() const;
+	string back() const;
 	void fromString(const string &s);
 };
 
