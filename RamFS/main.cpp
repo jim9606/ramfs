@@ -2,6 +2,7 @@
 #include <string>
 #include "fsimpl.h"
 #include "utils.h"
+#include "time.h"
 using namespace std;
 
 void PrintStructSize() {
@@ -20,7 +21,6 @@ fsimpl fs;
 int main(int argc, char **argv) {
 	//PrintStructSize();
 	//TODO:CLI Parsing
-	cout << fs.getFreeSpace() << endl;
-	printmem(&fs, 64);
+	cout << time(0) << endl;
 	return 0;
 }

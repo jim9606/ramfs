@@ -24,13 +24,14 @@ public:
 */
 class file_t {
 protected:
-	char *base;
+	block_dev *base;
 	inode_t *inode;
 	vector<data_block_t*> data_addr;
 	vector<sub_inode_rec_t> sub_inode_rec;
 public:
-	file_t(char *base, inode_t *inode);
-	bool init(char *base, inode_t *inode);
+	file_t() = default;
+	file_t(block_dev *base, inode_t *inode);
+	bool init(block_dev *base, inode_t *inode);
 	addr_t size() const;
 	bool isDir() const;
 	bool isFile() const;

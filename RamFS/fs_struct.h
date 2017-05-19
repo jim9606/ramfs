@@ -6,7 +6,7 @@
 using std::bitset;
 
 struct inode_t {
-	static constexpr char magic_val = 'I';
+	static constexpr char magic_val = 'N';
 	char magic;
 	
 	static constexpr uint8_t f_valid = 0b00000001;
@@ -25,11 +25,14 @@ struct inode_t {
 	block_no_t d_ref;
 	block_no_t i_ref;
 
+	inode_t();
 };
 
 struct sub_inode_rec_t {
 	inode_no_t inode_no;
 	char name[NAME_SIZE];
+
+	sub_inode_rec_t();
 };
 
 //Its size is BLOCK_SIZE
@@ -57,6 +60,8 @@ struct inode_tuple_t {
 	char padding[8];
 
 	inode_t rec[INODE_PER_TUPLE];
+
+	inode_tuple_t();
 };
 
 //Its size is 3*BLOCK_SIZE
