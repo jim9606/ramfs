@@ -14,7 +14,9 @@ struct inode_t {
 	static constexpr uint8_t f_dir = 0b00000100;
 	uint8_t flags;
 
+	//not valid for directory
 	addr_t size;
+
 	timestamp_t ctime;
 	timestamp_t atime;
 	/*

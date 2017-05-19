@@ -1,7 +1,7 @@
 #pragma once
 #include "misc.h"
 
-typedef vector<file_t> files_t;
+typedef std::vector<inode_no_t> files_t;
 
 class fsimpl {
 protected:
@@ -12,7 +12,7 @@ protected:
 
 	block_no_t getFreeBlock() const;
 	inode_t* getInode(inode_no_t no);
-	bool getFileStackByPath(vector<inode_no_t> &files, path_t path);
+	bool getFileStackByPath(files_t &files, path_t path);
 
 	//return 0 if no avaliable inode
 	inode_no_t allocInode();
@@ -21,19 +21,25 @@ public:
 	fsimpl();
 
 	path_t getCurrentDir() const;
-	string getCurrentDirString() const;
 	bool setCurrentDir(path_t path);
-	bool setCurrentDir(const string &s);
 
 	file_t getFileByName(string name);
 	file_t getFileByInodeNo(inode_no_t no);
 	//File opereration on current directory
 
-	//file_t对象用于复制或创建文件
+	//由名称获得inode编号
 	inode_no_t getFile(string name);
+
+	//在当前目录创建特定大小的文件，返回编号
 	inode_no_t createFile(string name, addr_t size);
+
+	//必须是当前目录下的文件，访问时调用
+	bool updateFile(string);
+
+	//成功返回true
 	bool deleteFile(inode_no_t no);
 
 	addr_t getFreeSpace() const;
+
 	files_t listSub();
 };

@@ -55,17 +55,8 @@ path_t fsimpl::getCurrentDir() const {
 	return currentDirPath;
 }
 
-string fsimpl::getCurrentDirString() const {
-	return currentDirPath.format();
-}
-
 bool fsimpl::setCurrentDir(path_t path) {
 	return true;
-}
-
-bool fsimpl::setCurrentDir(const string &s) {
-	path_t p(s);
-	return setCurrentDir(p);
 }
 
 addr_t fsimpl::getFreeSpace() const {
