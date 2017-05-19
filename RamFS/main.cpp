@@ -83,6 +83,7 @@ int main(int argc, char **argv) {
 			}
 		}
 		else if (order == "dir") {
+			path_t dir= fs.getCurrentDir();
 			//TODO
 		}
 		else if (order == "cp") {
