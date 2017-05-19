@@ -315,5 +315,17 @@ inode_no_t fsimpl::createDir(string name) {
 }
 
 vector<subfile_info> fsimpl::listSub() {
-
+	vector<subfile_info> res;
+	for (auto &it : currentDirFile.sub_inode_rec) {
+		subfile_info info;
+		auto inode = getInode(it.inode_no);
+		info.name = it.name;
+		info.isFile = inode->flags & inode_t::f_file;
+		info.ctime = inode->ctime;
+		info.atime = inode->atime;
+		info.size = inode->size;
+		info.inode_no = it.inode_no;
+		res.push_back(info);
+	}
+	return res;
 }
