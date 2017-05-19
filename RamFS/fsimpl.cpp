@@ -17,11 +17,11 @@ inode_t* fsimpl::getInode(inode_no_t no) {
 }
 
 indirect_block_t* fsimpl::getIBlock(block_no_t no) {
-	return (indirect_block_t*) &(dev.data_block[no - PROVISION_BLOCK * BLOCK_SIZE]);
+	return (indirect_block_t*) &(dev.data_block[no - PROVISION_BLOCK]);
 }
 
 bool fsimpl::getFileStackByPath(files_t &files, path_t path){
-	file_t tempFile = file_t(&dev, 0, "");
+	file_t tempFile = file_t(&dev, rootInode, "");
 	files.clear();
 	files.push_back(0);
 	for (size_t i = 0; i < path.size(); ++i) {
@@ -89,11 +89,11 @@ void fsimpl::addNewSubForCD(const inode_no_t sub,const string subName) {
 		DBlock->init();
 	}
 	else {
-		assert(CDrecCount >= 2 * INODE_REC_PER_DIRBLOCK);
+		assert(CDrecCount <= 2 * INODE_REC_PER_DIRBLOCK);
 		if (CDrecCount < INODE_REC_PER_DIRBLOCK)
-			dir_block_t *DBlock = (dir_block_t*)getIBlock(CDInode->d_ref);	//在第一数据块追加
+			DBlock = (dir_block_t*)getIBlock(CDInode->d_ref);	//在第一数据块追加
 		else
-			dir_block_t *DBlock = (dir_block_t*)getIBlock(CDInode->i_ref);	//在第二数据块追加
+			DBlock = (dir_block_t*)getIBlock(CDInode->i_ref);	//在第二数据块追加
 	}
 	DBlock->rec[recOrd].inode_no = sub;
 	strcpy(DBlock->rec[recOrd].name, subName.c_str());
@@ -178,7 +178,7 @@ path_t fsimpl::getCurrentDir() const {
 
 bool fsimpl::setCurrentDir(path_t path) {
 	//拼接相对路径
-	if (path.front()=="//") {
+	if (path.size() > 0 && path.front()=="//") {
 		path_t rootPath = getCurrentDir();
 		path = rootPath.append(path);
 	}
@@ -188,6 +188,11 @@ bool fsimpl::setCurrentDir(path_t path) {
 		if (!(getInode(npwd.back())->flags & inode_t::f_dir)) return false;//It's a file
 		currentDirFileStack = npwd;
 		currentDirPath = path;
+		if (path.size() == 0)
+			currentDirFile = file_t(&dev, rootInode, "");
+		else {
+			currentDirFile = file_t(&dev, getInode(npwd.back()), path.back());
+		}
 	}
 	return b;
 }
@@ -208,6 +213,10 @@ file_t fsimpl::getFileByName(string name) {
 		}
 	}
 	return file_t();
+}
+
+file_t fsimpl::getAnonFile(inode_no_t no) {
+	return file_t(&dev, getInode(no), "");
 }
 
 inode_no_t fsimpl::createFile(string name, addr_t size) {
@@ -251,23 +260,20 @@ inode_no_t fsimpl::createFile(string name, addr_t size) {
 	//分配数据块
 	block_no_t blockNo = PROVISION_BLOCK;
 	if (size > BLOCK_SIZE) {	//分配间接块
-		while (blockNo < TOTAL_BLOCK_COUNT && dev.superblock.block_bitset[blockNo]) ++blockNo;
+		blockNo = allocBlock(blockNo);
 		newInode->i_ref = blockNo;
-		dev.superblock.block_bitset.set(blockNo);
 	}
 	if (size > 0) {		//分配直接块
-		while (blockNo < TOTAL_BLOCK_COUNT && dev.superblock.block_bitset[blockNo]) ++blockNo;
+		blockNo = allocBlock(blockNo);
 		newInode->d_ref = blockNo;
-		dev.superblock.block_bitset.set(blockNo);
 		--wantedBlockNum;
 	}
 	if (size > BLOCK_SIZE) {
 		indirect_block_t *indBlock = getIBlock(newInode->i_ref);
 		memset(indBlock, 0, sizeof(indirect_block_t));
 		for (block_no_t i = 0; i < wantedBlockNum; ++i) {
-			while (blockNo < TOTAL_BLOCK_COUNT && dev.superblock.block_bitset[blockNo]) ++blockNo;
+			blockNo = allocBlock(blockNo);
 			indBlock->block_no[i] = blockNo;
-			dev.superblock.block_bitset.set(blockNo);
 		}
 	}
 
@@ -280,10 +286,10 @@ bool fsimpl::deleteFile(string name) {
 
 	size_t recOrd = 0;
 	auto &subList = currentDirFile.sub_inode_rec;
-	while (subList.at(recOrd).name == name) ++recOrd;
+	while (subList.at(recOrd).name != name) ++recOrd;
 	auto rec = subList.at(recOrd);
 	deleteInode(rec.inode_no);
-	subList.erase(subList.begin(), subList.begin() + recOrd);
+	subList.erase(subList.begin() + recOrd);
 	regenerateCDFile(currentDirFile);
 	return true;
 }
@@ -297,10 +303,13 @@ bool fsimpl::updateFile(string name) {
 	if (!f.isValid()) return false;	//ERR:没找到文件
 
 	f.inode->atime = time(0);
+	return updateFile();
+}
+
+bool fsimpl::updateFile() {
 	for (auto &it : currentDirFileStack) {
 		getInode(it)->atime = time(0);
 	}
-
 	return true;
 }
 
@@ -310,6 +319,9 @@ inode_no_t fsimpl::createDir(string name) {
 	inode_t *newInode = getInode(inodeNo);
 	newInode->init();
 	newInode->flags = inode_t::f_valid | inode_t::f_dir;
+
+	//修改工作目录inode
+	addNewSubForCD(inodeNo, name);
 
 	return inodeNo;
 }

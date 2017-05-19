@@ -64,7 +64,7 @@ void copyfile(file_t &dst, const file_t &src);
 struct subfile_info {
 	string name;
 	bool isFile;
-	timestamp_t ctime, atime;
+	time_t ctime, atime;
 	addr_t size;
 	inode_no_t inode_no;
 };

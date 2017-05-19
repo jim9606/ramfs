@@ -64,22 +64,29 @@ bool file_t::init(block_dev *base, inode_t *inode, string name) {
 	this->inode = inode;
 	this->name = name;
 	if (!isValid()) return false;
-	if (size() == 0)
-		return true;
-	data_addr.push_back((data_block_t*)base + inode->d_ref);
-	if (size() <= BLOCK_SIZE)
-		return true;
-	indirect_block_t *i_block = (indirect_block_t*)base + inode->i_ref;
-	for (size_t i = 1; i < inode->rec_count; ++i) {
-		data_addr.push_back((data_block_t*)base + i_block->block_no[i]);
+	data_addr.clear();
+	sub_inode_rec.clear();
+	if (isFile()) {
+		if (inode->rec_count == 0) return true;
+		data_addr.push_back((data_block_t*)base + inode->d_ref);
+		if (inode->rec_count == 1) return true;
+		indirect_block_t *i_block = (indirect_block_t*)base + inode->i_ref;
+		for (size_t i = 1; i < inode->rec_count; ++i) {
+			data_addr.push_back((data_block_t*)base + i_block->block_no[i]);
+		}
 	}
-	//TODO
 	if (isDir()) {
-		auto it = data_addr.cbegin();
-		for (size_t i = 0; i < inode->rec_count; ++it) {
-			dir_block_t *db = (dir_block_t*)(*it);
-			for (size_t j = 0; j < INODE_REC_PER_DIRBLOCK && i < inode->rec_count; ++j, ++i)
-				sub_inode_rec.push_back(db->rec[j]);
+		int n = min((size_t)inode->rec_count,INODE_REC_PER_DIRBLOCK);
+		dir_block_t *DBlock = (dir_block_t*)base + inode->d_ref;
+		for (size_t i = 0; i < n; ++i) {
+			sub_inode_rec.push_back(DBlock->rec[i]);
+		}
+		n -= INODE_REC_PER_DIRBLOCK;
+		if (n > 0) {
+			DBlock = (dir_block_t*)base + inode->i_ref;
+			for (size_t i = 0; i < n; ++i) {
+				sub_inode_rec.push_back(DBlock->rec[i]);
+			}
 		}
 	}
 	return true;

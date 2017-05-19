@@ -34,7 +34,12 @@ int main(int argc, char **argv) {
 				cin >> fileSize;
 				path_t file(pathString);
 				if (fs.setCurrentDir(file.parent())) {
-					fs.createFile(file.back(), fileSize);
+					auto r = fs.createFile(file.back(), fileSize);
+					if (r == 0) 
+						cout << "Failed to create the file." << endl;
+					else {
+						genfile(fs.getAnonFile(r));
+					}
 				}
 				else
 				{
@@ -131,8 +136,14 @@ int main(int argc, char **argv) {
 		}
 		else if (order == "ls") {
 			auto subFiles = fs.listSub();
+			cout << "Name\tSize\tCreated\t\t\tAccessed" << endl;
 			for (auto &subInfo : subFiles) {
-				cout << subInfo.name << "\t" << subInfo.size << "\t" << subInfo.ctime << endl;
+				cout << subInfo.name;
+				if (subInfo.isFile)
+					cout << '\t' << subInfo.size << '\t';
+				else
+					cout << "/\t-\t";
+				cout << ctime(&subInfo.ctime) << "  " << ctime(&subInfo.atime) << endl;
 			}
 		}
 		else if (order == "cp") {
@@ -202,6 +213,7 @@ int main(int argc, char **argv) {
 							buffer[BLOCK_SIZE] = '\0';
 							for (auto it : file.data_addr) {
 								memcpy(buffer, it->b, min(size, BLOCK_SIZE));
+								buffer[min(size, BLOCK_SIZE)] = '\0';
 								cout << buffer;
 								size -= BLOCK_SIZE;
 							}

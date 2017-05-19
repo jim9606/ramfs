@@ -15,6 +15,7 @@ protected:
 
 	inode_t* getInode(inode_no_t no);
 	indirect_block_t* getIBlock(block_no_t no);
+	//根据路径生成inode编号表
 	bool getFileStackByPath(files_t &files, path_t path);
 
 	//return 0 if no avaliable inode
@@ -48,11 +49,16 @@ public:
 	inode_no_t getFile(string name) const;
 	file_t getFileByName(string name);
 
+	//由Inode编号获得匿名文件
+	file_t getAnonFile(inode_no_t no);
+
 	//在当前目录创建特定大小的文件，返回编号
 	inode_no_t createFile(string name, addr_t size);
 
 	//必须是当前目录下的文件，修改访问时间时调用
 	bool updateFile(string name);
+	//更新工作目录访问时间
+	bool updateFile();
 
 	//成功返回true,自动删除子文件
 	bool deleteFile(string name);
