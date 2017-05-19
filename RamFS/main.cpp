@@ -27,7 +27,7 @@ int main(int argc, char **argv) {
 	cout << fs.getCurrentDir().format() + "$";
 	while (cin >> order)
 	{
-		if (order == "cf") {
+		if (order == "createFile" || order == "cf") {
 			cin >> pathString;
 			if (regex_match(pathString, filePattern)) {
 				int fileSize = 0;
@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
 				if (fs.setCurrentDir(file.parent())) {
 					inode_no_t no = 0;
 					auto err = fs.createFile(no, file.back(), fileSize);
-					if (err == 0) 
+					if (err != 0)
 						cout << fsimpl::getErrMsg(err) << endl;
 					else {
 						genfile(fs.getAnonFile(no));
@@ -52,7 +52,7 @@ int main(int argc, char **argv) {
 				cout << "\"" + pathString + "\" is not a valid path, please input again." << endl;
 			}
 		}
-		else if (order == "rf") {
+		else if (order == "deleteFile" || order == "rf") {
 			cin >> pathString;
 			if (regex_match(pathString, filePattern)) {
 				path_t file(pathString);
@@ -75,7 +75,7 @@ int main(int argc, char **argv) {
 				cout << "\"" + pathString + "\" is not a valid path, please input again." << endl;
 			}
 		}
-		else if (order == "md") {
+		else if (order == "createDir" || order == "md") {
 			cin >> pathString;
 			if (regex_match(pathString, dirPattern)) {
 				path_t dir(pathString);
@@ -98,7 +98,7 @@ int main(int argc, char **argv) {
 				cout << "\"" + pathString + "\" is not a valid path, please input again." << endl;
 			}
 		}
-		else if (order == "rd") {
+		else if (order == "deleteDir" || order == "rd") {
 			cin >> pathString;
 			if (regex_match(pathString, dirPattern)) {
 				path_t dir(pathString);
@@ -121,7 +121,7 @@ int main(int argc, char **argv) {
 				cout << "\"" + pathString + "\" is not a valid path, please input again." << endl;
 			}
 		}
-		else if (order == "cd")
+		else if (order == "changeDir" || order == "cd")
 		{
 			cin >> pathString;
 			if (regex_match(pathString, dirPattern)) {
@@ -135,7 +135,7 @@ int main(int argc, char **argv) {
 				cout << "\"" + pathString + "\" is not a valid path, please input again." << endl;
 			}
 		}
-		else if (order == "ls") {
+		else if (order == "dir" || order == "ls") {
 			auto subFiles = fs.listSub();
 			for (auto &subInfo : subFiles) {
 				cout << endl << "Name: " << subInfo.name << endl;
@@ -163,6 +163,8 @@ int main(int argc, char **argv) {
 						auto fromFileNumber = fs.getFile(fromFilePath.back());
 						if (fromFileNumber) {
 							auto fromFile = fs.getFileByName(fromFilePath.back());
+							fs.updateFile(fromFile.name);
+							fs.setCurrentDir(nowDir);
 							if (fs.setCurrentDir(toFilePath.parent())) {
 								auto toFileNumber = fs.getFile(toFilePath.back());
 								if (toFileNumber) {
@@ -170,11 +172,12 @@ int main(int argc, char **argv) {
 								}
 								else
 								{
-									auto r = fs.createFile(toFilePath.back(), fromFile.size());
-									if (r == 0)
-										cout << "Failed to create the file." << endl;
+									inode_no_t no = 0;
+									auto err = fs.createFile(no, toFilePath.back(), fromFile.size());
+									if (err != 0)
+										cout << fsimpl::getErrMsg(err) << endl;
 									else {
-										genfile(fs.getAnonFile(r));
+										genfile(fs.getAnonFile(no));
 										auto toFile = fs.getFileByName(toFilePath.back());
 										copyfile(toFile, fromFile);
 										fs.setCurrentDir(nowDir);
@@ -229,6 +232,7 @@ int main(int argc, char **argv) {
 								size -= BLOCK_SIZE;
 							}
 							cout << endl;
+							fs.updateFile(file.name);
 						}
 						else {
 							cout << "\"" + pathString + "\" is not a file." << endl;
@@ -248,7 +252,7 @@ int main(int argc, char **argv) {
 				cout << "\"" + pathString + "\" is not a valid path, please input again." << endl;
 			}
 		}
-		else if (order == "quit") {
+		else if (order == "quit" || order == "exit") {
 			return 0;
 		}
 		else
