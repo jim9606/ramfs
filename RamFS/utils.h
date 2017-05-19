@@ -1,5 +1,10 @@
 #pragma once
 #include <stdio.h>
+#include <string>
+#include <vector>
+
+using std::string;
+using std::vector;
 
 void logerr(const char* tag, const char* msg);
 
