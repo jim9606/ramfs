@@ -1,6 +1,8 @@
 #pragma once
 #define _CRT_SECURE_NO_WARNINGS
+//#define NDEBUG
 #include <stdint.h>
+#include <assert.h>
 constexpr size_t BLOCK_SIZE = 1024;
 constexpr size_t FS_SIZE = 16 * 1024 * 1024;
 constexpr size_t INODE_PER_TUPLE = 42;

@@ -20,14 +20,16 @@ struct inode_t {
 	timestamp_t ctime;
 	timestamp_t atime;
 	/*
-	for file inode, it means number of data_block
-	for directory inode, it means number of children
+	文件时指数据块数目
+	目录时指子文件数目
 	*/
 	uint16_t rec_count;
 	block_no_t d_ref;
+	//目录时解析为直接块
 	block_no_t i_ref;
 
 	inode_t();
+	void init();
 };
 
 struct sub_inode_rec_t {
@@ -43,11 +45,14 @@ struct dir_block_t {
 	char magic[4];
 
 	sub_inode_rec_t rec[INODE_REC_PER_DIRBLOCK];
+
+	dir_block_t();
+	void init();
 };
 
 //Its size is BLOCK_SIZE
 struct indirect_block_t {
-	block_no_t block_no[512];
+	block_no_t block_no[BLOCKNO_PER_IBLOCK];
 };
 
 //Its size is BLOCK_SIZE

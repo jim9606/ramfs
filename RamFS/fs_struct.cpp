@@ -2,6 +2,10 @@
 #include "time.h"
 
 inode_t::inode_t() {
+	init();
+}
+
+void inode_t::init() {
 	memset(this, 0, sizeof(inode_t));
 	magic = magic_val;
 	flags = 0;
@@ -12,6 +16,15 @@ inode_t::inode_t() {
 sub_inode_rec_t::sub_inode_rec_t() {
 	inode_no = 0;
 	strcpy(name, "");
+}
+
+dir_block_t::dir_block_t() {
+	init();
+}
+
+void dir_block_t::init() {
+	memset(this, 0, sizeof(dir_block_t));
+	strcpy(magic, magic_val);
 }
 
 inode_tuple_t::inode_tuple_t() {
