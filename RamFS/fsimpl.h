@@ -22,9 +22,11 @@ public:
 
 	path_t getCurrentDir() const;
 	bool setCurrentDir(path_t path);
+	bool setSubCurrentDir(string name);
 
 	file_t getFileByName(string name);
 	file_t getFileByInodeNo(inode_no_t no);
+
 	//File opereration on current directory
 
 	//由名称获得inode编号
@@ -33,11 +35,17 @@ public:
 	//在当前目录创建特定大小的文件，返回编号
 	inode_no_t createFile(string name, addr_t size);
 
-	//必须是当前目录下的文件，访问时调用
-	bool updateFile(string);
+	//必须是当前目录下的文件，修改访问时间时调用
+	bool updateFile(string name);
 
 	//成功返回true
 	bool deleteFile(inode_no_t no);
+
+	//创建子目录
+	inode_no_t createDir(string name);
+
+	//删除子目录(自动删除所有子文件)
+	bool deleteDir(string name);
 
 	addr_t getFreeSpace() const;
 
