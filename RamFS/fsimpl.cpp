@@ -63,11 +63,10 @@ path_t fsimpl::getCurrentDir() const {
 
 bool fsimpl::setCurrentDir(path_t path) {
 	//拼接相对路径
-	if (path.front() == "//") {
+	if (!path.front().empty()) {
 		path_t rootPath = getCurrentDir();
 		path = rootPath.append(path);
-	}
-	
+	}	
 	files_t npwd;
 	bool b = getFileStackByPath(npwd, path);
 	if (b) {

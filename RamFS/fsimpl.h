@@ -11,7 +11,6 @@ protected:
 	file_t currentDirFile;
 	inode_t *rootInode;
 
-	block_no_t getFreeBlock() const;
 	inode_t* getInode(inode_no_t no);
 	bool getFileStackByPath(files_t &files, path_t path);
 
@@ -19,6 +18,7 @@ protected:
 	inode_no_t allocInode();
 	void createRootFile();
 public:
+	block_no_t getFreeBlock() const;
 	fsimpl();
 
 	path_t getCurrentDir() const;
@@ -47,5 +47,5 @@ public:
 
 	addr_t getFreeSpace() const;
 
-	files_t listSub();
+	vector<sub_inode_rec_t> listSub();
 };

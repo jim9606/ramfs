@@ -24,7 +24,7 @@ int main(int argc, char **argv) {
 	//cout << fs.getFreeSpace() << endl;
 	//printmem(&fs, 64);
 	regex filePattern("(/?[\\w-]+)+(\\.\\w+)?");
-	regex dirPattern("(/?[\\w-]+)+");
+	regex dirPattern("(/?[\\w-]*)+");
 	string order;
 	string pathString;
 	while (cin>>order)
@@ -98,7 +98,20 @@ int main(int argc, char **argv) {
 		else if (order == "deleteDir") {
 			cin >> pathString;
 			if (regex_match(pathString, dirPattern)) {
-				//TODO
+				path_t dir(pathString);
+				if (fs.setCurrentDir(dir.parent())) {
+					inode_no_t dirNumber = fs.getFile(dir.back());
+					if (dirNumber) {
+						fs.deleteDir(dir.back());
+					}
+					else {
+						cout << "\"" + pathString + "\" not found." << endl;
+					}
+				}
+				else
+				{
+					cout << "Dir \"" + dir.parent().format() + "\" is not a valid path, please input again." << endl;
+				}
 			}
 			else
 			{
@@ -110,7 +123,9 @@ int main(int argc, char **argv) {
 			cin >> pathString;
 			if (regex_match(pathString, dirPattern)) {
 				path_t dir(pathString);
-				fs.setCurrentDir(dir);
+				if (!fs.setCurrentDir(dir)) {
+					cout << "\"" + pathString + "\" not found." << endl;
+				}
 			}
 			else
 			{
@@ -118,8 +133,11 @@ int main(int argc, char **argv) {
 			}
 		}
 		else if (order == "dir") {
-			path_t dir= fs.getCurrentDir();
-			//TODO
+			auto subFiles = fs.listSub();
+			for (auto &file : subFiles) {
+				file_t nf = fs.getFileByName(file.name);
+				//cout << file.name << nf.size() << nf.inode->atime
+			}
 		}
 		else if (order == "cp") {
 			string direction;
@@ -127,9 +145,37 @@ int main(int argc, char **argv) {
 			if (regex_match(pathString, filePattern)) {
 				cin >> direction;
 				if (regex_match(direction, filePattern)) {
-					path_t from(pathString);
-					path_t to(direction);
-					
+					path_t nowDir = fs.getCurrentDir();
+					path_t fromFilePath(pathString);
+					path_t toDirPath(direction);
+					if (fs.setCurrentDir(fromFilePath.parent())) {
+						auto fromFileNumber = fs.getFile(fromFilePath.back());
+						if (fromFileNumber) {
+							auto fromFile = fs.getFileByName(fromFilePath.back());
+							if (fs.setCurrentDir(toDirPath.parent())) {
+								auto toDirNumber = fs.getFile(toDirPath.back());
+								if (toDirNumber) {
+									auto toDir = fs.getFileByName(toDirPath.back());
+									copyfile(toDir, fromFile);
+								}
+								else
+								{
+									cout << "\"" + direction + "\" not found." << endl;
+								}
+							}
+							else {
+								cout << "Dir \"" + toDirPath.parent().format() + "\" is not a valid path, please input again." << endl;
+							}
+						}
+						else
+						{
+							cout << "\"" + pathString + "\" not found." << endl;
+						}
+					}
+					else
+					{
+						cout << "Dir \"" + fromFilePath.parent().format() + "\" is not a valid path, please input again." << endl;
+					}
 				}
 				else
 				{
@@ -142,13 +188,14 @@ int main(int argc, char **argv) {
 			}
 		}
 		else if (order == "sum") {
-			//TODO
+			cout << fs.getFreeSpace() << "space remain" << endl;
+			cout << fs.getFreeBlock() << "blocks remain" << endl;
+			//cout<<fs.get
 		}
 		else if (order == "cat") {
 			//TODO
 		}
 		else if (order == "quit") {
-			//TODO
 			return 0;
 		}
 		else
