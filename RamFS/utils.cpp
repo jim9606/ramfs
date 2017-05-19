@@ -1,5 +1,5 @@
 #include "utils.h"
-#include <string.h>
+#include <cstring>
 #include <random>
 
 using std::default_random_engine;
