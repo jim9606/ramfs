@@ -5,9 +5,8 @@
 using namespace std;
 
 int main() {
-	int t = 5;
-	int &p = t;
-	p = 6;
-	cout << t;
+	uint8_t t = 0b00000001,p;
+	p = ~t;
+	cout << (int)(uint8_t)(p | ~p);
 	return 0;
 }

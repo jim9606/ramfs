@@ -31,13 +31,16 @@ public:
 	inode_t *inode;
 	vector<data_block_t*> data_addr;
 	vector<sub_inode_rec_t> sub_inode_rec;
+	string name;
 public:
-	file_t() = default;
-	file_t(block_dev *base, inode_t *inode);
-	bool init(block_dev *base, inode_t *inode);
+	file_t();
+	file_t(block_dev *base, inode_t *inode, string name);
+	bool init(block_dev *base, inode_t *inode, string name);
 	addr_t size() const;
 	bool isDir() const;
 	bool isFile() const;
+	bool isValid() const;
+	string getName() const;
 
 	//valid for file
 	addr_t read(char* buffer, const addr_t offset, const addr_t length) const;

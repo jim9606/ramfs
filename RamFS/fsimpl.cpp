@@ -10,22 +10,22 @@ inode_t* fsimpl::getInode(inode_no_t no) {
 }
 
 bool fsimpl::getFileStackByPath(files_t &files, path_t path){
-	file_t tempFile;
+	file_t tempFile = file_t(&dev, 0, "");
 	files.clear();
 	files.push_back(0);
 	for (size_t i = 0; i < path.size(); ++i) {
-		tempFile = file_t(&dev, getInode(files.back()));
 		if (!tempFile.isDir()) return false;//Not a directory
 		auto &sublist = tempFile.sub_inode_rec;
-		inode_no_t nextInode = 0;
+		auto nextInode = sublist.cend();
 		for (auto it = sublist.cbegin(); it != sublist.cend(); ++it) {
 			if (it->name == path.get(i)) {
-				nextInode = it->inode_no;
+				nextInode = it;
 				break;
 			}
 		}
-		if (nextInode == 0) return false;//Cannot find such file
-		files.push_back(nextInode);
+		if (nextInode == sublist.cend()) return false;//Cannot find such file
+		files.push_back(nextInode->inode_no);
+		tempFile = file_t(&dev, getInode(files.back()),nextInode->name);
 	}
 	return true;
 }
@@ -46,11 +46,15 @@ void fsimpl::createRootFile() {
 	ri->rec_count = 0;
 
 	dev.superblock.inode_bitset.set(0);
+	rootInode = ri;
+	currentDirFile = file_t(&dev, ri, "");
 }
 
 fsimpl::fsimpl() {
 	//Create rootFile
 	createRootFile();
+	currentDirFileStack.clear();
+	currentDirFileStack.push_back(0);
 }
 
 path_t fsimpl::getCurrentDir() const {
@@ -58,13 +62,40 @@ path_t fsimpl::getCurrentDir() const {
 }
 
 bool fsimpl::setCurrentDir(path_t path) {
-	return true;
+	files_t npwd;
+	bool b = getFileStackByPath(npwd, path);
+	if (b) {
+		if (!(getInode(npwd.back())->flags & inode_t::f_dir)) return false;//It's a file
+		currentDirFileStack = npwd;
+		currentDirPath = path;
+
+	}
+	return b;
+}
+
+inode_no_t fsimpl::getFile(string name) const{
+	for (auto const &it : currentDirFile.sub_inode_rec) {
+		if (it.name == name) {
+			return it.inode_no;
+		}
+	}
+	return 0;
+}
+
+file_t fsimpl::getFileByName(string name) {
+	for (auto const &it : currentDirFile.sub_inode_rec) {
+		if (it.name == name) {
+			return file_t(&dev, getInode(it.inode_no), it.name);
+		}
+	}
+	return file_t();
+}
+
+inode_no_t fsimpl::createFile(string name, addr_t size) {
+	
 }
 
 addr_t fsimpl::getFreeSpace() const {
 	return getFreeBlock() * BLOCK_SIZE;
 }
 
-file_t fsimpl::getFileByName(string name) {
-	return getFileByInodeNo(getFile(name));
-}

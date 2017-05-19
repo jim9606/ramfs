@@ -8,6 +8,7 @@ protected:
 	block_dev dev;
 	path_t currentDirPath;
 	files_t currentDirFileStack;
+	file_t currentDirFile;
 	inode_t *rootInode;
 
 	block_no_t getFreeBlock() const;
@@ -22,15 +23,12 @@ public:
 
 	path_t getCurrentDir() const;
 	bool setCurrentDir(path_t path);
-	bool setSubCurrentDir(string name);
-
-	file_t getFileByName(string name);
-	file_t getFileByInodeNo(inode_no_t no);
 
 	//File opereration on current directory
 
 	//由名称获得inode编号
-	inode_no_t getFile(string name);
+	inode_no_t getFile(string name) const;
+	file_t getFileByName(string name);
 
 	//在当前目录创建特定大小的文件，返回编号
 	inode_no_t createFile(string name, addr_t size);

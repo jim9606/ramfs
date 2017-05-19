@@ -40,13 +40,20 @@ void path_t::pop() {
 	n.pop_back();
 }
 
-file_t::file_t(block_dev *base, inode_t *inode) {
-	init(base, inode);
+file_t::file_t() {
+	base = nullptr;
+	inode = nullptr;
 }
 
-bool file_t::init(block_dev *base, inode_t *inode) {
+file_t::file_t(block_dev *base, inode_t *inode, string name) {
+	init(base, inode,name);
+}
+
+bool file_t::init(block_dev *base, inode_t *inode, string name) {
 	this->base = base;
 	this->inode = inode;
+	this->name = name;
+	if (!isValid()) return false;
 	if (size() == 0)
 		return true;
 	data_addr.push_back((data_block_t*)base + inode->d_ref);
@@ -78,6 +85,14 @@ bool file_t::isDir() const {
 
 bool file_t::isFile() const {
 	return inode->flags & inode_t::f_file;
+}
+
+bool file_t::isValid() const {
+	return (inode != nullptr) && (inode->flags & inode_t::f_valid);
+}
+
+string file_t::getName() const {
+	return name;
 }
 
 addr_t file_t::read(char* buffer, const addr_t offset, const addr_t length) const {
