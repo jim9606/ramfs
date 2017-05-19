@@ -100,7 +100,7 @@ int main(int argc, char **argv) {
 				if (fs.setCurrentDir(dir.parent())) {
 					inode_no_t dirNumber = fs.getFile(dir.back());
 					if (dirNumber) {
-						fs.deleteDir(dir.back());
+						fs.deleteFile(dir.back());
 					}
 					else {
 						cout << "\"" + pathString + "\" not found." << endl;
@@ -132,9 +132,8 @@ int main(int argc, char **argv) {
 		}
 		else if (order == "dir") {
 			auto subFiles = fs.listSub();
-			for (auto &file : subFiles) {
-				file_t nf = fs.getFileByName(file.name);
-				cout << file.name << "\t" << nf.size() << "\t" << nf.getCtime() << endl;
+			for (auto &subInfo : subFiles) {
+				cout << subInfo.name << "\t" << subInfo.size << "\t" << subInfo.ctime << endl;
 			}
 		}
 		else if (order == "cp") {
