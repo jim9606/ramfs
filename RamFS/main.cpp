@@ -24,6 +24,7 @@ int main(int argc, char **argv) {
 	regex dirPattern("(/?[\\w-]*)+");
 	string order;
 	string pathString;
+	cout << fs.getCurrentDir().format() + "$";
 	while (cin >> order)
 	{
 		cout << fs.getCurrentDir().format() + "$";
