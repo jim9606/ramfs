@@ -98,10 +98,14 @@ file_t fsimpl::getFileByName(string name) {
 }
 
 inode_no_t fsimpl::createFile(string name, addr_t size) {
-	
+	return 0;
 }
 
 addr_t fsimpl::getFreeSpace() const {
 	return getFreeBlock() * BLOCK_SIZE;
 }
 
+bool fsimpl::updateFile(string name) {
+	//TODO
+	return true;
+}
