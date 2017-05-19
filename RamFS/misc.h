@@ -23,7 +23,7 @@ public:
 时间戳由fs维护
 */
 class file_t {
-protected:
+public:
 	block_dev *base;
 	inode_t *inode;
 	vector<data_block_t*> data_addr;
@@ -39,9 +39,6 @@ public:
 	//valid for file
 	addr_t read(char* buffer, const addr_t offset, const addr_t length) const;
 	addr_t write(const char* buffer, const addr_t offset, const addr_t length);
-
-	//valid for directory
-	const vector<sub_inode_rec_t> & getSubNode();
 
 };
 
