@@ -1,5 +1,5 @@
 #include "utils.h"
-#include <string.h>
+#include <cstring>
 
 void logerr(const char* tag, const char* msg) {
 	fprintf(stderr, "%s : %s\n", tag, msg);

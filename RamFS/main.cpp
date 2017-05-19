@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <regex>
 #include "fs_struct.h"
 #include "utils.h"
 using namespace std;
@@ -16,6 +17,101 @@ void PrintStructSize() {
 }
 
 int main(int argc, char **argv) {
-	PrintStructSize();
+	//PrintStructSize();
+	regex filePattern("(/?[\\w-]+)+(\\.\\w+)?");
+	regex dirPattern("(/?[\\w-]+)+");
+	string order;
+	string path;
+	while (cin>>order)
+	{
+		if (order == "createFile") {
+			cin >> path;
+			if (regex_match(path, filePattern)) {
+				int fileSize = 0;
+				cin >> fileSize;
+				//TODO
+			}
+			else
+			{
+				cout << "\"" + path + "\" is not a valid path, please input again." << endl;
+			}
+		}
+		else if (order == "deleteFile") {
+			cin >> path;
+			if (regex_match(path, filePattern)) {
+				//TODO
+			}
+			else
+			{
+				cout << "\"" + path + "\" is not a valid path, please input again." << endl;
+			}
+		}
+		else if (order == "createDir") {
+			cin >> path;
+			if (regex_match(path, dirPattern)) {
+				//TODO
+			}
+			else
+			{
+				cout << "\"" + path + "\" is not a valid path, please input again." << endl;
+			}
+		}
+		else if (order == "deleteDir") {
+			cin >> path;
+			if (regex_match(path, dirPattern)) {
+				//TODO
+			}
+			else
+			{
+				cout << "\"" + path + "\" is not a valid path, please input again." << endl;
+			}
+		}
+		else if(order=="changeDir")
+		{
+			cin >> path;
+			if (regex_match(path, dirPattern)) {
+				//TODO
+			}
+			else
+			{
+				cout << "\"" + path + "\" is not a valid path, please input again." << endl;
+			}
+		}
+		else if (order == "dir") {
+			//TODO
+		}
+		else if (order == "cp") {
+			string direction;
+			cin >> path;
+			if (regex_match(path, filePattern)) {
+				cin >> direction;
+				if (regex_match(direction, filePattern)) {
+					//TODO
+				}
+				else
+				{
+					cout << "\"" + direction + "\" is not a valid path, please input again." << endl;
+				}
+			}
+			else
+			{
+				cout << "\"" + path + "\" is not a valid path, please input again." << endl;
+			}
+		}
+		else if (order == "sum") {
+			//TODO
+		}
+		else if (order == "cat") {
+			//TODO
+		}
+		else if (order == "quit") {
+			//TODO
+			return;
+		}
+		else
+		{
+			cout << "\"" + order + "\" is not a valid order, please input again." << endl;
+		}
+	}
 	return 0;
 }
