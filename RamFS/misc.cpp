@@ -27,11 +27,11 @@ void path_t::pop() {
 	n.pop_back();
 }
 
-file_t::file_t(char *base, inode_t *inode) {
+file_t::file_t(block_dev *base, inode_t *inode) {
 	init(base, inode);
 }
 
-bool file_t::init(char *base, inode_t *inode) {
+bool file_t::init(block_dev *base, inode_t *inode) {
 	this->base = base;
 	this->inode = inode;
 	if (size() == 0)

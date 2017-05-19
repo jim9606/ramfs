@@ -20,9 +20,6 @@ void PrintStructSize() {
 fsimpl fs;
 
 int main(int argc, char **argv) {
-	//PrintStructSize();
-	//cout << fs.getFreeSpace() << endl;
-	//printmem(&fs, 64);
 	regex filePattern("(/?[\\w-]+)+(\\.\\w+)?");
 	regex dirPattern("(/?[\\w-]+)+");
 	string order;

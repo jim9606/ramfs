@@ -11,8 +11,11 @@ protected:
 	file_t rootFile;
 
 	block_no_t getFreeBlock() const;
-	bool getFileStackByPath(filestack_t &files, path_t path) const;
+	inode_t* getInode(inode_no_t no);
+	bool getFileStackByPath(filestack_t &files, path_t path);
 
+	//return 0 if no avaliable inode
+	inode_no_t allocInode();
 	void createRootFile();
 public:
 	fsimpl();
