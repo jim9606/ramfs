@@ -28,7 +28,7 @@ int main(int argc, char **argv) {
 	while (cin >> order)
 	{
 		cout << fs.getCurrentDir().format() + "$";
-		if (order == "createFile") {
+		if (order == "cf") {
 			cin >> pathString;
 			if (regex_match(pathString, filePattern)) {
 				int fileSize = 0;
@@ -47,7 +47,7 @@ int main(int argc, char **argv) {
 				cout << "\"" + pathString + "\" is not a valid path, please input again." << endl;
 			}
 		}
-		else if (order == "deleteFile") {
+		else if (order == "rf") {
 			cin >> pathString;
 			if (regex_match(pathString, filePattern)) {
 				path_t file(pathString);
@@ -70,7 +70,7 @@ int main(int argc, char **argv) {
 				cout << "\"" + pathString + "\" is not a valid path, please input again." << endl;
 			}
 		}
-		else if (order == "createDir") {
+		else if (order == "md") {
 			cin >> pathString;
 			if (regex_match(pathString, dirPattern)) {
 				path_t dir(pathString);
@@ -93,7 +93,7 @@ int main(int argc, char **argv) {
 				cout << "\"" + pathString + "\" is not a valid path, please input again." << endl;
 			}
 		}
-		else if (order == "deleteDir") {
+		else if (order == "rd") {
 			cin >> pathString;
 			if (regex_match(pathString, dirPattern)) {
 				path_t dir(pathString);
@@ -116,7 +116,7 @@ int main(int argc, char **argv) {
 				cout << "\"" + pathString + "\" is not a valid path, please input again." << endl;
 			}
 		}
-		else if (order == "changeDir")
+		else if (order == "cd")
 		{
 			cin >> pathString;
 			if (regex_match(pathString, dirPattern)) {
@@ -130,7 +130,7 @@ int main(int argc, char **argv) {
 				cout << "\"" + pathString + "\" is not a valid path, please input again." << endl;
 			}
 		}
-		else if (order == "dir") {
+		else if (order == "ls") {
 			auto subFiles = fs.listSub();
 			for (auto &subInfo : subFiles) {
 				cout << subInfo.name << "\t" << subInfo.size << "\t" << subInfo.ctime << endl;
