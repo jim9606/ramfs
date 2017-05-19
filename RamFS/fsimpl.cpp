@@ -9,16 +9,23 @@ inode_t* fsimpl::getInode(inode_no_t no) {
 	return &(dev.inode_tuple[no / INODE_PER_TUPLE].rec[no % INODE_PER_TUPLE]);
 }
 
-bool fsimpl::getFileStackByPath(filestack_t &files, path_t path){
-	file_t tempFile = rootFile;
+bool fsimpl::getFileStackByPath(vector<inode_no_t> &files, path_t path){
+	file_t tempFile;
 	files.clear();
-	files.push_back(rootFile);
+	files.push_back(0);
 	for (size_t i = 0; i < path.size(); ++i) {
-		auto &sublist = tempFile.getSubNode();
+		tempFile = file_t(&dev, getInode(files.back()));
+		if (!tempFile.isDir()) return false;//Not a directory
+		auto &sublist = tempFile.sub_inode_rec;
+		inode_no_t nextInode = 0;
 		for (auto it = sublist.cbegin(); it != sublist.cend(); ++it) {
-			if (it->name == path.get(i))
-				files.push_back(file_t(&dev, getInode(it->inode_no)));
+			if (it->name == path.get(i)) {
+				nextInode = it->inode_no;
+				break;
+			}
 		}
+		if (nextInode == 0) return false;//Cannot find such file
+		files.push_back(nextInode);
 	}
 	return true;
 }
@@ -30,7 +37,14 @@ inode_no_t fsimpl::allocInode() {
 }
 
 void fsimpl::createRootFile() {
-	
+	inode_t *ri = getInode(0);
+	ri->flags = inode_t::f_valid | inode_t::f_dir;
+	ri->size = 0;
+	ri->ctime = time(0);
+	ri->atime = time(0);
+	ri->rec_count = 0;
+
+	dev.superblock.inode_bitset.set(0);
 }
 
 fsimpl::fsimpl() {

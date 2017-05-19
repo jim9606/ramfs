@@ -1,18 +1,18 @@
 #pragma once
 #include "misc.h"
 
-typedef vector<file_t> filestack_t;
+typedef vector<file_t> files_t;
 
 class fsimpl {
 protected:
 	block_dev dev;
 	path_t currentDirPath;
-	file_t currentDirFile;
-	file_t rootFile;
+	files_t currentDirFileStack;
+	inode_t *rootInode;
 
 	block_no_t getFreeBlock() const;
 	inode_t* getInode(inode_no_t no);
-	bool getFileStackByPath(filestack_t &files, path_t path);
+	bool getFileStackByPath(vector<inode_no_t> &files, path_t path);
 
 	//return 0 if no avaliable inode
 	inode_no_t allocInode();
@@ -24,10 +24,11 @@ public:
 	bool setCurrentDir(path_t path);
 
 	//File opereration on current directory
-	bool getFile(file_t &file, string name);
-	bool createFile(file_t &file, string name, addr_t size);
-	bool deleteFile(file_t &target);
+	//file_t对象用于复制或创建文件
+	inode_no_t getFile(string name);
+	inode_no_t createFile(string name, addr_t size);
+	bool deleteFile(inode_no_t no);
 
 	addr_t getFreeSpace() const;
-
+	files_t listSub();
 };
