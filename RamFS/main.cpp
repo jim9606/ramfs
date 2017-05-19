@@ -35,7 +35,7 @@ int main(int argc, char **argv) {
 				path_t file(pathString);
 				if (fs.setCurrentDir(file.parent())) {
 					auto r = fs.createFile(file.back(), fileSize);
-					if (r == 0) 
+					if (r == 0)
 						cout << "Failed to create the file." << endl;
 					else {
 						genfile(fs.getAnonFile(r));
@@ -136,14 +136,17 @@ int main(int argc, char **argv) {
 		}
 		else if (order == "ls") {
 			auto subFiles = fs.listSub();
-			cout << "Name\tSize\tCreated\t\t\tAccessed" << endl;
 			for (auto &subInfo : subFiles) {
-				cout << subInfo.name;
-				if (subInfo.isFile)
-					cout << '\t' << subInfo.size << '\t';
-				else
-					cout << "/\t-\t";
-				cout << ctime(&subInfo.ctime) << "  " << ctime(&subInfo.atime) << endl;
+				cout << endl << "Name: " << subInfo.name << endl;
+				cout << "Type: ";
+				if (subInfo.isFile) {
+					cout << "File" << endl;
+					cout << "Size: " << subInfo.size << endl;
+				}
+				else {
+					cout << "Directory" << endl;
+				}
+				cout << "Created: " << ctime(&subInfo.ctime) << "Accessed: " << ctime(&subInfo.atime);
 			}
 		}
 		else if (order == "cp") {
@@ -154,24 +157,31 @@ int main(int argc, char **argv) {
 				if (regex_match(direction, filePattern)) {
 					path_t nowDir = fs.getCurrentDir();
 					path_t fromFilePath(pathString);
-					path_t toDirPath(direction);
+					path_t toFilePath(direction);
 					if (fs.setCurrentDir(fromFilePath.parent())) {
 						auto fromFileNumber = fs.getFile(fromFilePath.back());
 						if (fromFileNumber) {
 							auto fromFile = fs.getFileByName(fromFilePath.back());
-							if (fs.setCurrentDir(toDirPath.parent())) {
-								auto toDirNumber = fs.getFile(toDirPath.back());
-								if (toDirNumber) {
-									auto toDir = fs.getFileByName(toDirPath.back());
-									copyfile(toDir, fromFile);
+							if (fs.setCurrentDir(toFilePath.parent())) {
+								auto toFileNumber = fs.getFile(toFilePath.back());
+								if (toFileNumber) {
+									cout << "\"" + direction + "\" has exists." << endl;
 								}
 								else
 								{
-									cout << "\"" + direction + "\" not found." << endl;
+									auto r = fs.createFile(toFilePath.back(), fromFile.size());
+									if (r == 0)
+										cout << "Failed to create the file." << endl;
+									else {
+										genfile(fs.getAnonFile(r));
+										auto toFile = fs.getFileByName(toFilePath.back());
+										copyfile(toFile, fromFile);
+										fs.setCurrentDir(nowDir);
+									}
 								}
 							}
 							else {
-								cout << "Dir \"" + toDirPath.parent().format() + "\" is not a valid path, please input again." << endl;
+								cout << "Dir \"" + toFilePath.parent().format() + "\" is not a valid path, please input again." << endl;
 							}
 						}
 						else
