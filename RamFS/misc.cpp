@@ -28,16 +28,26 @@ void path_t::push(const string &s) {
 }
 
 void path_t::fromString(const string &s) {
-	char* ss = strtok(s.data,"/");
-	while (ss!=NULL)
-	{
-		n.push_back(ss);
-		ss = strtok(NULL, "/");
-	}
+	n = split(s, "/");
 }
 
-void path_t::pop() {
-	n.pop_back();
+path_t path_t::append(const path_t &relativePath) {
+	n.insert(n.end(),relativePath.n.begin() + 1, relativePath.n.end());
+	return *this;
+}
+
+path_t path_t::parent() {
+	path_t parent(*this);
+	parent.n.pop_back();
+	return parent;
+}
+
+string path_t::front() const {
+	return n.front();
+}
+
+string path_t::back() const {
+	return n.back();
 }
 
 file_t::file_t(block_dev *base, inode_t *inode) {

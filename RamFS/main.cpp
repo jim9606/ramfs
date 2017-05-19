@@ -26,62 +26,95 @@ int main(int argc, char **argv) {
 	regex filePattern("(/?[\\w-]+)+(\\.\\w+)?");
 	regex dirPattern("(/?[\\w-]+)+");
 	string order;
-	string path;
+	string pathString;
 	while (cin>>order)
 	{
 		cout << fs.getCurrentDir().format() + "$";
 		if (order == "createFile") {
-			cin >> path;
-			if (regex_match(path, filePattern)) {
+			cin >> pathString;
+			if (regex_match(pathString, filePattern)) {
 				int fileSize = 0;
 				cin >> fileSize;
-				fs.setCurrentDir(path_t(path));
-				genfile()
+				path_t file(pathString);
+				if (fs.setCurrentDir(file.parent())) {
+					fs.createFile(file.back(), fileSize);
+				}
+				else
+				{
+					cout << "Dir \"" + file.parent().format() + "\" is not a valid path, please input again." << endl;
+				}
 			}
 			else
 			{
-				cout << "\"" + path + "\" is not a valid path, please input again." << endl;
+				cout << "\"" + pathString + "\" is not a valid path, please input again." << endl;
 			}
 		}
 		else if (order == "deleteFile") {
-			cin >> path;
-			if (regex_match(path, filePattern)) {
-				//TODO
+			cin >> pathString;
+			if (regex_match(pathString, filePattern)) {
+				path_t file(pathString);
+				if (fs.setCurrentDir(file.parent())) {
+					inode_no_t fileNumber = fs.getFile(file.back());
+					if (fileNumber) {
+						fs.deleteFile(fileNumber);
+					}
+					else {
+						cout << "\"" + pathString + "\" not found." << endl;
+					}
+				}
+				else
+				{
+					cout << "Dir \"" + file.parent().format() + "\" is not a valid path, please input again." << endl;
+				}				
 			}
 			else
 			{
-				cout << "\"" + path + "\" is not a valid path, please input again." << endl;
+				cout << "\"" + pathString + "\" is not a valid path, please input again." << endl;
 			}
 		}
 		else if (order == "createDir") {
-			cin >> path;
-			if (regex_match(path, dirPattern)) {
-				//TODO
+			cin >> pathString;
+			if (regex_match(pathString, dirPattern)) {
+				path_t dir(pathString);
+				if (fs.setCurrentDir(dir.parent())) {
+					inode_no_t dirNumber = fs.getFile(dir.back());
+					if (dirNumber) {
+						cout << "\"" + pathString + "\" exists." << endl;
+					}
+					else {
+						fs.createDir(dir.back());
+					}
+				}
+				else
+				{
+					cout << "Dir \"" + dir.parent().format() + "\" is not a valid path, please input again." << endl;
+				}
 			}
 			else
 			{
-				cout << "\"" + path + "\" is not a valid path, please input again." << endl;
+				cout << "\"" + pathString + "\" is not a valid path, please input again." << endl;
 			}
 		}
 		else if (order == "deleteDir") {
-			cin >> path;
-			if (regex_match(path, dirPattern)) {
+			cin >> pathString;
+			if (regex_match(pathString, dirPattern)) {
 				//TODO
 			}
 			else
 			{
-				cout << "\"" + path + "\" is not a valid path, please input again." << endl;
+				cout << "\"" + pathString + "\" is not a valid path, please input again." << endl;
 			}
 		}
 		else if(order=="changeDir")
 		{
-			cin >> path;
-			if (regex_match(path, dirPattern)) {
-				fs.setCurrentDir(path);
+			cin >> pathString;
+			if (regex_match(pathString, dirPattern)) {
+				path_t dir(pathString);
+				fs.setCurrentDir(dir);
 			}
 			else
 			{
-				cout << "\"" + path + "\" is not a valid path, please input again." << endl;
+				cout << "\"" + pathString + "\" is not a valid path, please input again." << endl;
 			}
 		}
 		else if (order == "dir") {
@@ -90,11 +123,11 @@ int main(int argc, char **argv) {
 		}
 		else if (order == "cp") {
 			string direction;
-			cin >> path;
-			if (regex_match(path, filePattern)) {
+			cin >> pathString;
+			if (regex_match(pathString, filePattern)) {
 				cin >> direction;
 				if (regex_match(direction, filePattern)) {
-					path_t from(path);
+					path_t from(pathString);
 					path_t to(direction);
 					
 				}
@@ -105,7 +138,7 @@ int main(int argc, char **argv) {
 			}
 			else
 			{
-				cout << "\"" + path + "\" is not a valid path, please input again." << endl;
+				cout << "\"" + pathString + "\" is not a valid path, please input again." << endl;
 			}
 		}
 		else if (order == "sum") {

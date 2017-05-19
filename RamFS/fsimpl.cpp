@@ -58,7 +58,18 @@ path_t fsimpl::getCurrentDir() const {
 }
 
 bool fsimpl::setCurrentDir(path_t path) {
-	return true;
+	//拼接相对路径
+	if (path.front() == "//") {
+		path_t rootPath = getCurrentDir();
+		path = rootPath.append(path);
+	}
+	files_t npwd;
+	bool b = getFileStackByPath(npwd, path);
+	if (b) {
+		currentDirFileStack = npwd;
+		currentDirPath = path;
+	}
+	return b;
 }
 
 addr_t fsimpl::getFreeSpace() const {
