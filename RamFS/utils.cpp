@@ -47,8 +47,8 @@ vector<string> split(const string& str, const char* c)
 {
 	char *cstr, *p;
 	vector<string> res;
-	if (str.front() == '/') {
-		res.push_back("");
+	if (str.front() != '/') {
+		res.push_back("//");
 	}
 	cstr = new char[str.size() + 1];
 	strcpy(cstr, str.c_str());

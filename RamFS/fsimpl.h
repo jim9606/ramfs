@@ -18,6 +18,7 @@ protected:
 	inode_no_t allocInode();
 	void createRootFile();
 public:
+	block_no_t getUsedBlock() const;
 	block_no_t getFreeBlock() const;
 	fsimpl();
 
