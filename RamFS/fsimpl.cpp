@@ -1,6 +1,10 @@
 #include "fsimpl.h"
 #include "utils.h"
 #include <time.h>
+#include <algorithm>
+
+using std::min;
+
 block_no_t fsimpl::getUsedBlock() const {
 	return TOTAL_BLOCK_COUNT - getFreeBlock();
 }
@@ -38,6 +42,10 @@ bool fsimpl::getFileStackByPath(files_t &files, path_t path){
 }
 
 inode_no_t fsimpl::allocInode() {
+	if (dev.superblock.inode_bitset.count() == INODE_COUNT) {
+		logerr("fsimpl.allocInode", "No more Inode");
+		return 0;
+	}
 	inode_no_t inum = 1;
 	while (inum < INODE_COUNT && dev.superblock.inode_bitset[inum]) ++inum;
 	dev.superblock.inode_bitset.set(inum);
@@ -93,24 +101,62 @@ void fsimpl::addNewSubForCD(const inode_no_t sub,const string subName) {
 	currentDirFile.init(&dev, CDInode, currentDirFile.getName());
 }
 
-bool fsimpl::deleteDirTree(inode_no_t no) {
+void fsimpl::regenerateCDFile(file_t &f) {
+	auto &subList = f.sub_inode_rec;
+	f.inode->rec_count = subList.size();
+	if (subList.size() == 0) {
+		dev.superblock.block_bitset.set(f.inode->d_ref, false);
+		memset(getIBlock(f.inode->d_ref), TRIM, BLOCK_SIZE);
+		return;
+	}
+	if (subList.size() < INODE_REC_PER_DIRBLOCK) {
+		dev.superblock.block_bitset.set(f.inode->i_ref, false);
+		memset(getIBlock(f.inode->i_ref), TRIM, BLOCK_SIZE);
+	}
+	size_t n = min(subList.size(), INODE_REC_PER_DIRBLOCK);
+	dir_block_t *DBlock = (dir_block_t*)getIBlock(f.inode->d_ref);
+	for (size_t i = 0; i < n; ++i) {
+		DBlock->rec[i] = subList.at(i);
+	}
+	if (subList.size() < INODE_REC_PER_DIRBLOCK)
+		return;
+	DBlock = (dir_block_t*)getIBlock(f.inode->i_ref);
+	n = subList.size() - INODE_REC_PER_DIRBLOCK;
+	for (size_t i = 0; i < n; ++i) {
+		DBlock->rec[i] = subList.at(i + INODE_REC_PER_DIRBLOCK);
+	}
+}
+
+bool fsimpl::deleteInode(inode_no_t no) {
 	inode_t *inode = getInode(no);
 	inode->flags &= ~inode_t::f_valid;
 	dev.superblock.inode_bitset.set(no, false);
-	//TODO:
 	if (inode->rec_count == 0) return true;
-	//擦除第二数据块
-	if (inode->rec_count > INODE_REC_PER_DIRBLOCK) {
-		dir_block_t *DBlock = (dir_block_t*)getIBlock(inode->i_ref);
-		auto n = inode->rec_count - INODE_REC_PER_DIRBLOCK;
-		for (size_t i = 0; i < n; ++i)
-			deleteDirTree(DBlock->rec[i].inode_no);
-		inode->rec_count = INODE_REC_PER_DIRBLOCK;
+	if (inode->flags & inode_t::f_file) {	//删除文件
+		dev.superblock.block_bitset.set(inode->d_ref, false);
+		memset(getIBlock(inode->d_ref), TRIM, BLOCK_SIZE);
+		if (inode->rec_count == 1) return true;
+		indirect_block_t *IBlock = getIBlock(inode->i_ref);
+		for (size_t i = 0; i + 1 < inode->rec_count; ++i) {
+			dev.superblock.block_bitset.set(IBlock->block_no[i], false);
+			memset(getIBlock(inode->d_ref), TRIM, BLOCK_SIZE);
+		}
 	}
-	//擦除第一数据块
-	dir_block_t *DBlock = (dir_block_t*)getIBlock(inode->d_ref);
-	for (size_t i = 0; i < inode->rec_count; ++i)
-		deleteDirTree(DBlock->rec[i].inode_no);
+	else if (inode->flags & inode_t::f_dir) {	//删除目录
+		//擦除第二数据块
+		if (inode->rec_count > INODE_REC_PER_DIRBLOCK) {
+			dir_block_t *DBlock = (dir_block_t*)getIBlock(inode->i_ref);
+			auto n = inode->rec_count - INODE_REC_PER_DIRBLOCK;
+			for (size_t i = 0; i < n; ++i)
+				deleteInode(DBlock->rec[i].inode_no);
+			inode->rec_count = INODE_REC_PER_DIRBLOCK;
+		}
+		//擦除第一数据块
+		dir_block_t *DBlock = (dir_block_t*)getIBlock(inode->d_ref);
+		for (size_t i = 0; i < inode->rec_count; ++i)
+			deleteInode(DBlock->rec[i].inode_no);
+	}
+	return true;
 }
 
 fsimpl::fsimpl() {
@@ -191,6 +237,8 @@ inode_no_t fsimpl::createFile(string name, addr_t size) {
 	if (size > BLOCK_SIZE) --wantedBlockNum;
 
 	inode_no_t newInodeNo = allocInode();
+	//ERR:INODE耗尽
+	if (newInodeNo == 0) return 0;
 	inode_t *newInode = getInode(newInodeNo);
 	newInode->init();
 	newInode->flags = inode_t::f_valid | inode_t::f_file;
@@ -226,8 +274,18 @@ inode_no_t fsimpl::createFile(string name, addr_t size) {
 	return newInodeNo;
 }
 
-bool deleteFile(inode_no_t no) {
+bool fsimpl::deleteFile(string name) {
+	auto f = getFileByName(name);
+	if (!f.isValid()) return false;	//ERR:没找到文件
 
+	size_t recOrd = 0;
+	auto &subList = currentDirFile.sub_inode_rec;
+	while (subList.at(recOrd).name == name) ++recOrd;
+	auto rec = subList.at(recOrd);
+	deleteInode(rec.inode_no);
+	subList.erase(subList.begin(), subList.begin() + recOrd);
+	regenerateCDFile(currentDirFile);
+	return true;
 }
 
 addr_t fsimpl::getFreeSpace() const {
@@ -235,6 +293,13 @@ addr_t fsimpl::getFreeSpace() const {
 }
 
 bool fsimpl::updateFile(string name) {
-	//TODO
+	auto f = getFileByName(name);
+	if (!f.isValid()) return false;	//ERR:没找到文件
+
+	f.inode->atime = time(0);
+	for (auto &it : currentDirFileStack) {
+		getInode(it)->atime = time(0);
+	}
+
 	return true;
 }

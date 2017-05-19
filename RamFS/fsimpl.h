@@ -26,8 +26,11 @@ protected:
 	//修改工作目录inode以增加新子文件（目录）,需要预先检查空间是否充足
 	void addNewSubForCD(inode_no_t sub, string subName);
 
+	//由file_t的sub_inode_rec持久化至设备,只在删除文件时对工作目录调用
+	void regenerateCDFile(file_t &f);
+
 	//删除目录树
-	bool deleteDirTree(inode_no_t no);
+	bool deleteInode(inode_no_t no);
 public:
 	block_no_t getUsedBlock() const;
 	block_no_t getFreeBlock() const;
@@ -51,14 +54,11 @@ public:
 	//必须是当前目录下的文件，修改访问时间时调用
 	bool updateFile(string name);
 
-	//成功返回true
+	//成功返回true,自动删除子文件
 	bool deleteFile(string name);
 
 	//创建子目录
 	inode_no_t createDir(string name);
-
-	//删除子目录(自动删除所有子文件)
-	bool deleteDir(string name);
 
 	addr_t getFreeSpace() const;
 

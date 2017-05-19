@@ -35,6 +35,7 @@ public:
 	vector<data_block_t*> data_addr;
 	vector<sub_inode_rec_t> sub_inode_rec;
 	string name;
+
 public:
 	file_t();
 	file_t(block_dev *base, inode_t *inode, string name);

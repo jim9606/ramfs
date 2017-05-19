@@ -17,3 +17,5 @@ typedef uint32_t addr_t;
 typedef uint16_t block_no_t;	//14b
 typedef uint32_t timestamp_t;
 typedef uint16_t inode_no_t;
+
+constexpr uint8_t TRIM = 0x00;
