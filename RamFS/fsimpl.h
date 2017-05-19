@@ -13,7 +13,6 @@ protected:
 	file_t currentDirFile;
 	inode_t *rootInode;
 
-	block_no_t getFreeBlock() const;
 	inode_t* getInode(inode_no_t no);
 	indirect_block_t* getIBlock(block_no_t no);
 	bool getFileStackByPath(files_t &files, path_t path);
@@ -30,6 +29,8 @@ protected:
 	//删除目录树
 	bool deleteDirTree(inode_no_t no);
 public:
+	block_no_t getUsedBlock() const;
+	block_no_t getFreeBlock() const;
 	fsimpl();
 
 	//检查文件名
@@ -61,5 +62,5 @@ public:
 
 	addr_t getFreeSpace() const;
 
-	files_t listSub();
+	vector<sub_inode_rec_t> listSub();
 };

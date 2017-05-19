@@ -1,7 +1,9 @@
 #include "fsimpl.h"
 #include "utils.h"
 #include <time.h>
-
+block_no_t fsimpl::getUsedBlock() const {
+	return TOTAL_BLOCK_COUNT - getFreeBlock();
+}
 block_no_t fsimpl::getFreeBlock() const {
 	return (block_no_t)(dev.superblock.block_bitset.size() - dev.superblock.block_bitset.count());
 }
@@ -130,11 +132,10 @@ path_t fsimpl::getCurrentDir() const {
 
 bool fsimpl::setCurrentDir(path_t path) {
 	//拼接相对路径
-	if (path.front() == "//") {
+	if (path.front()=="//") {
 		path_t rootPath = getCurrentDir();
 		path = rootPath.append(path);
 	}
-	
 	files_t npwd;
 	bool b = getFileStackByPath(npwd, path);
 	if (b) {
@@ -233,3 +234,7 @@ addr_t fsimpl::getFreeSpace() const {
 	return getFreeBlock() * BLOCK_SIZE;
 }
 
+bool fsimpl::updateFile(string name) {
+	//TODO
+	return true;
+}

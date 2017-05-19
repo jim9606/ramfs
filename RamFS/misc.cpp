@@ -32,13 +32,13 @@ void path_t::fromString(const string &s) {
 }
 
 path_t path_t::append(const path_t &relativePath) {
-	n.insert(n.end(),relativePath.n.begin() + 1, relativePath.n.end());
+	n.insert(n.end(), relativePath.n.begin() + 1, relativePath.n.end());
 	return *this;
 }
 
 path_t path_t::parent() {
 	path_t parent(*this);
-	parent.n.pop_back();
+	if (parent.n.size())	parent.n.pop_back();
 	return parent;
 }
 
@@ -56,7 +56,7 @@ file_t::file_t() {
 }
 
 file_t::file_t(block_dev *base, inode_t *inode, string name) {
-	init(base, inode,name);
+	init(base, inode, name);
 }
 
 bool file_t::init(block_dev *base, inode_t *inode, string name) {
@@ -116,17 +116,17 @@ addr_t file_t::read(char* buffer, const addr_t offset, const addr_t length) cons
 		return 0;
 	}
 	if (length == 0) return 0;
-	auto it = data_addr.cbegin(),cend = data_addr.cend();
+	auto it = data_addr.cbegin(), cend = data_addr.cend();
 	it += roff / BLOCK_SIZE;
 	roff %= BLOCK_SIZE;
 	//Read first target block
 	if (roff + rlen <= BLOCK_SIZE) {
-		memcpy(buffer,(char*)(*it) + roff , rlen);
+		memcpy(buffer, (char*)(*it) + roff, rlen);
 		rlen = 0;
 	}
 	//Read more block
 	for (; rlen > 0 && it != cend; ++it) {
-		addr_t cr = min(length,(addr_t)BLOCK_SIZE);
+		addr_t cr = min(length, (addr_t)BLOCK_SIZE);
 		memcpy(buffer + r, (char*)(*it), cr);
 		rlen -= cr; r += cr;
 	}
@@ -143,7 +143,7 @@ addr_t file_t::write(const char* buffer, const addr_t offset, const addr_t lengt
 		logerr("file_t.write", "Too large offset");
 		return 0;
 	}
-	else if (offset + length > fsize){
+	else if (offset + length > fsize) {
 		logerr("file_t.write", "Too large length");
 		return 0;
 	}
@@ -194,3 +194,11 @@ void copyfile(file_t &dst, const file_t &src) {
 		dst.write(buffer, offset, len);
 	}
 }
+
+timestamp_t file_t::getAtime() const {
+	return inode->atime;
+}
+timestamp_t file_t::getCtime() const {
+	return inode->ctime;
+}
+

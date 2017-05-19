@@ -20,14 +20,11 @@ void PrintStructSize() {
 fsimpl fs;
 
 int main(int argc, char **argv) {
-	//PrintStructSize();
-	//cout << fs.getFreeSpace() << endl;
-	//printmem(&fs, 64);
 	regex filePattern("(/?[\\w-]+)+(\\.\\w+)?");
-	regex dirPattern("(/?[\\w-]+)+");
+	regex dirPattern("(/?[\\w-]*)+");
 	string order;
 	string pathString;
-	while (cin>>order)
+	while (cin >> order)
 	{
 		cout << fs.getCurrentDir().format() + "$";
 		if (order == "createFile") {
@@ -65,7 +62,7 @@ int main(int argc, char **argv) {
 				else
 				{
 					cout << "Dir \"" + file.parent().format() + "\" is not a valid path, please input again." << endl;
-				}				
+				}
 			}
 			else
 			{
@@ -98,19 +95,34 @@ int main(int argc, char **argv) {
 		else if (order == "deleteDir") {
 			cin >> pathString;
 			if (regex_match(pathString, dirPattern)) {
-				//TODO
+				path_t dir(pathString);
+				if (fs.setCurrentDir(dir.parent())) {
+					inode_no_t dirNumber = fs.getFile(dir.back());
+					if (dirNumber) {
+						fs.deleteDir(dir.back());
+					}
+					else {
+						cout << "\"" + pathString + "\" not found." << endl;
+					}
+				}
+				else
+				{
+					cout << "Dir \"" + dir.parent().format() + "\" is not a valid path, please input again." << endl;
+				}
 			}
 			else
 			{
 				cout << "\"" + pathString + "\" is not a valid path, please input again." << endl;
 			}
 		}
-		else if(order=="changeDir")
+		else if (order == "changeDir")
 		{
 			cin >> pathString;
 			if (regex_match(pathString, dirPattern)) {
 				path_t dir(pathString);
-				fs.setCurrentDir(dir);
+				if (!fs.setCurrentDir(dir)) {
+					cout << "\"" + pathString + "\" not found." << endl;
+				}
 			}
 			else
 			{
@@ -118,8 +130,11 @@ int main(int argc, char **argv) {
 			}
 		}
 		else if (order == "dir") {
-			path_t dir= fs.getCurrentDir();
-			//TODO
+			auto subFiles = fs.listSub();
+			for (auto &file : subFiles) {
+				file_t nf = fs.getFileByName(file.name);
+				cout << file.name << "\t" << nf.size() << "\t" << nf.getCtime() << endl;
+			}
 		}
 		else if (order == "cp") {
 			string direction;
@@ -127,9 +142,37 @@ int main(int argc, char **argv) {
 			if (regex_match(pathString, filePattern)) {
 				cin >> direction;
 				if (regex_match(direction, filePattern)) {
-					path_t from(pathString);
-					path_t to(direction);
-					
+					path_t nowDir = fs.getCurrentDir();
+					path_t fromFilePath(pathString);
+					path_t toDirPath(direction);
+					if (fs.setCurrentDir(fromFilePath.parent())) {
+						auto fromFileNumber = fs.getFile(fromFilePath.back());
+						if (fromFileNumber) {
+							auto fromFile = fs.getFileByName(fromFilePath.back());
+							if (fs.setCurrentDir(toDirPath.parent())) {
+								auto toDirNumber = fs.getFile(toDirPath.back());
+								if (toDirNumber) {
+									auto toDir = fs.getFileByName(toDirPath.back());
+									copyfile(toDir, fromFile);
+								}
+								else
+								{
+									cout << "\"" + direction + "\" not found." << endl;
+								}
+							}
+							else {
+								cout << "Dir \"" + toDirPath.parent().format() + "\" is not a valid path, please input again." << endl;
+							}
+						}
+						else
+						{
+							cout << "\"" + pathString + "\" not found." << endl;
+						}
+					}
+					else
+					{
+						cout << "Dir \"" + fromFilePath.parent().format() + "\" is not a valid path, please input again." << endl;
+					}
 				}
 				else
 				{
@@ -142,13 +185,48 @@ int main(int argc, char **argv) {
 			}
 		}
 		else if (order == "sum") {
-			//TODO
+			cout << fs.getFreeSpace() << "space remain" << endl;
+			cout << fs.getFreeBlock() << "blocks remain" << endl;
+			cout << fs.getUsedBlock() << "blocks used" << endl;
 		}
 		else if (order == "cat") {
-			//TODO
+			cin >> pathString;
+			if (regex_match(pathString, filePattern)) {
+				path_t filePath(pathString);
+				if (fs.setCurrentDir(filePath.parent())) {
+					inode_no_t fileNumber = fs.getFile(filePath.back());
+					if (fileNumber) {
+						auto file = fs.getFileByName(filePath.back());
+						if (file.isFile()) {
+							size_t size = file.size();
+							char buffer[BLOCK_SIZE + 1];
+							buffer[BLOCK_SIZE] = '\0';
+							for (auto it : file.data_addr) {
+								memcpy(buffer, it->b, min(size, BLOCK_SIZE));
+								cout << buffer;
+								size -= BLOCK_SIZE;
+							}
+							cout << endl;
+						}
+						else {
+							cout << "\"" + pathString + "\" is not a file." << endl;
+						}
+					}
+					else {
+						cout << "\"" + pathString + "\" not found." << endl;
+					}
+				}
+				else
+				{
+					cout << "Dir \"" + filePath.parent().format() + "\" is not a valid path, please input again." << endl;
+				}
+			}
+			else
+			{
+				cout << "\"" + pathString + "\" is not a valid path, please input again." << endl;
+			}
 		}
 		else if (order == "quit") {
-			//TODO
 			return 0;
 		}
 		else

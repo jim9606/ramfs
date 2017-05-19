@@ -51,6 +51,9 @@ public:
 	addr_t read(char* buffer, const addr_t offset, const addr_t length) const;
 	addr_t write(const char* buffer, const addr_t offset, const addr_t length);
 
+	//timestamp
+	timestamp_t getAtime() const;
+	timestamp_t getCtime() const;
 };
 
 //Fill a file with random string
