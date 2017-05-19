@@ -10,11 +10,14 @@ class path_t {
 protected:
 	vector<string> n;
 public:
+	path_t() = default;
+	path_t(const string &s);
 	size_t size() const;
 	string get(const size_t c) const;
 	string format() const;
 	void push(const string &s);
 	void pop();
+	void fromString(const string &s);
 };
 
 /*

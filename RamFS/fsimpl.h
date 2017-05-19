@@ -21,9 +21,14 @@ public:
 	fsimpl();
 
 	path_t getCurrentDir() const;
+	string getCurrentDirString() const;
 	bool setCurrentDir(path_t path);
+	bool setCurrentDir(const string &s);
 
+	file_t getFileByName(string name);
+	file_t getFileByInodeNo(inode_no_t no);
 	//File opereration on current directory
+
 	//file_t对象用于复制或创建文件
 	inode_no_t getFile(string name);
 	inode_no_t createFile(string name, addr_t size);
