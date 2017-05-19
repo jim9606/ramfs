@@ -17,6 +17,7 @@ public:
 	string format() const;
 	void push(const string &s);
 	void pop();
+	string back();
 	void fromString(const string &s);
 };
 

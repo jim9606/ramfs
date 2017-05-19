@@ -29,13 +29,14 @@ int main(int argc, char **argv) {
 	string path;
 	while (cin>>order)
 	{
-		cout << fs.getCurrentDirString() + "$";
+		cout << fs.getCurrentDir().format() + "$";
 		if (order == "createFile") {
 			cin >> path;
 			if (regex_match(path, filePattern)) {
 				int fileSize = 0;
 				cin >> fileSize;
-				//TODO
+				fs.setCurrentDir(path_t(path));
+				genfile()
 			}
 			else
 			{
