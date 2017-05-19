@@ -27,7 +27,6 @@ int main(int argc, char **argv) {
 	cout << fs.getCurrentDir().format() + "$";
 	while (cin >> order)
 	{
-		cout << fs.getCurrentDir().format() + "$";
 		if (order == "cf") {
 			cin >> pathString;
 			if (regex_match(pathString, filePattern)) {
@@ -185,9 +184,9 @@ int main(int argc, char **argv) {
 			}
 		}
 		else if (order == "sum") {
-			cout << fs.getFreeSpace() << "space remain" << endl;
-			cout << fs.getFreeBlock() << "blocks remain" << endl;
-			cout << fs.getUsedBlock() << "blocks used" << endl;
+			cout << fs.getFreeSpace() << " space remain" << endl;
+			cout << fs.getFreeBlock() << " blocks remain" << endl;
+			cout << fs.getUsedBlock() << " blocks used" << endl;
 		}
 		else if (order == "cat") {
 			cin >> pathString;
@@ -233,6 +232,7 @@ int main(int argc, char **argv) {
 		{
 			cout << "\"" + order + "\" is not a valid order, please input again." << endl;
 		}
+		cout << fs.getCurrentDir().format() + "$";
 	}
 	return 0;
 }
