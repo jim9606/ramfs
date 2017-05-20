@@ -38,9 +38,9 @@ void printmem(const void* po, size_t len) {
 void fillbuffer(char buffer[], size_t len) {
 	static default_random_engine engine;
 	static constexpr char charset[] = "0123456789ABCDEF";
-	static uniform_int_distribution<int> dist(0,9);
+	static uniform_int_distribution<int> dist(0,15);
 	for (size_t i = 0; i < len; ++i)
-		buffer[i] = charset[i % 16];
+		buffer[i] = charset[dist(engine)];
 }
 
 vector<string> split(const string& str, const char* c)
